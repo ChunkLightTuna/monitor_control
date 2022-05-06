@@ -1,0 +1,2 @@
+adafruit-circuitpython-charlcd==3.3.9
+gpiozero==1.5.1
