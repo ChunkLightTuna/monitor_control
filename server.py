@@ -1,87 +1,61 @@
 #!/usr/bin/env python3
 
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-import logging
 import json
-import requests
+import logging
+from http import HTTPStatus
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-lol_global = lambda s: print(f"DEFAULT LOL GLOBAL: {s}")
+
+def msg_fun(_):
+    pass
+
+
 class Handler(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        logging.info(self.path)
-        if self.path == "/favicon.ico":
-            logging.info("FAVICONNN")
-            return super(Handler,self).do_GET()
+    def version_string(self):
+        return "16x2"
 
-        if self.path not in ["","/"] :
-            self.send_response(404)
-            return
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write("""
-<!DOCTYPE html>
-<html lang="en-US">
-<head>
-  <meta charset="UTF-8">
-  <title>16x2</title>
-  <style>
-    form {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction:column;
-      margin:4ch;
-    }
-    input {
-      width: 16ch;
-    }
-    #submit {
-      width:17ch;
-      margin:1ch;
-    }
-  </style>
-</head>
-<body>
-  <form id="form" autocomplete="off">
-    <input type="text" id="line_one" maxlength="16" placeholder="Two Lines">
-    <input type="text" id="line_two" maxlength="16" placeholder="16 Chars Each">
-    <input type="submit" id="submit" value="Send">
-  </form>
-  <script>
-  document.getElementById('form').onsubmit = function(event) {
-        let line_one = document.getElementById('line_one').value
-    let line_two = document.getElementById('line_two').value
-    fetch("/", {method: "POST", headers: {'Content-Type': 'application/json'}, body: JSON.stringify([line_one, line_two])});
-        return false;
-  }
-  </script>
-</body>
-</html>""".encode('utf-8'))
-        logging.info("recieved get")
+    def do_GET(self):
+        """Serve a GET request."""
+        if self.path != "/favicon.ico":
+            self.path = "index.html"
+
+        f = self.send_head()
+        if f:
+            try:
+                self.copyfile(f, self.wfile)
+            finally:
+                f.close()
 
     def do_POST(self):
-        logging.info("attempting post?")
-        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
-        post_data = self.rfile.read(content_length) # <--- Gets the data itself
-
+        """Serve a POST request."""
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
         try:
-            logging.info(f"${post_data.decode('utf-8')} POSTed to ${self.path}")
-
             line_one, line_two = json.loads(post_data.decode('utf-8'))
-            lol_global(f"${line_one}\n${line_two}")
-            self.send_response(200)
+            if not line_one and not line_two:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Ya gottta give me something")
+            elif len(line_one) > 16 or len(line_two) > 16:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Max 16 char per line")
+            else:
+                msg_fun(f"{line_one}\n{line_two}")
+                self.send_response(HTTPStatus.OK)
+                self.end_headers()
+
         except Exception as e:
             logging.error(repr(e))
-            self.send_response(400)
+            self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Uhhhh")
 
-def run(msg_fun):
-    #server_address = ('https://16x2.oeleri.ch', 1602)
+
+def run(msg_f):
     server_address = ('', 1602)
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    #lol_global=msg_fun
+
+    if callable(msg_f):
+        logging.debug(f"msg_f is <{str(msg_f)}>")
+        global msg_fun
+        msg_fun = msg_f
+    else:
+        logging.error("msg_f not callable!")
+
     httpd = ThreadingHTTPServer(server_address, Handler)
     logging.info('Starting httpd...\n')
     try:
@@ -91,5 +65,9 @@ def run(msg_fun):
     httpd.server_close()
     logging.info('Stopping httpd...\n')
 
+
 if __name__ == '__main__':
-    run(lambda s: print(f"<<{s}>>"))
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    run(lambda s: logging.debug(f"<<{s}>>"))
