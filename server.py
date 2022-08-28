@@ -33,7 +33,6 @@ class Handler(SimpleHTTPRequestHandler):
         try:
             line_one, line_two = json.loads(post_data.decode('utf-8'))
             if not line_one and not line_two:
-                self.send_error(HTTPStatus.BAD_REQUEST, "Ya gottta give me something")
             elif len(line_one) > 16 or len(line_two) > 16:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Max 16 char per line")
             else:
@@ -42,8 +41,11 @@ class Handler(SimpleHTTPRequestHandler):
                 self.end_headers()
 
         except Exception as e:
-            logging.error(repr(e))
-            self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Uhhhh")
+            if 'not enough values to unpack' in ve:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Ya gottta give me something")
+            else:
+                logging.error(repr(e))
+                self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Uhhhh")
 
 
 def run(msg_f):
