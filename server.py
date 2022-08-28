@@ -41,7 +41,7 @@ class Handler(SimpleHTTPRequestHandler):
                 self.end_headers()
 
         except Exception as e:
-            if 'not enough values to unpack' in ve:
+            if 'not enough values to unpack' in repr(e):
                 self.send_error(HTTPStatus.BAD_REQUEST, "Ya gottta give me something")
             else:
                 logging.error(repr(e))
