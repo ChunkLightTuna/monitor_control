@@ -32,9 +32,11 @@ class Handler(SimpleHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         try:
             line_one, line_two = json.loads(post_data.decode('utf-8'))
-            if len(line_one) > 16 or len(line_two) > 16:
+            if not line_one and not line_two:
+                self.send_error(HTTPStatus.BAD_REQUEST, "Both lines empty")
+            elif len(line_one) > 16 or len(line_two) > 16:
                 self.send_error(HTTPStatus.BAD_REQUEST, "Max 16 char per line")
-            elif line_one or line_two:
+            else:
                 msg_fun(f"{line_one}\n{line_two}")
                 self.send_response(HTTPStatus.OK)
                 self.end_headers()
