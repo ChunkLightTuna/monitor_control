@@ -5,3 +5,6 @@ Description=Toggle Monitor Input from Keypad
 [Service]
 WorkingDirectory=${DIR}
 ExecStart=${DIR}/venv/bin/python ${DIR}/main.py
+
+[Install]
+WantedBy=multi-user.target
