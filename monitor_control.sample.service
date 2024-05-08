@@ -7,4 +7,4 @@ WorkingDirectory=${DIR}
 ExecStart=${DIR}/venv/bin/python ${DIR}/main.py
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
