@@ -26,7 +26,7 @@ sudo apt install ddcutil python-pip -y
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-sed -e "s/\${DIR}/$(pwd)/" monitor_control.service
+sed -e "s/\${DIR}/$(pwd | sed 's|/|\\\/|g')/g" monitor_control.service
 systemctl --user enable --now "$(pwd)/monitor_control.service"
 ```
 
