@@ -22,8 +22,11 @@ These can be found using with `ddcutil` using\
 ```bash
 git clone https://github.com/ChunkLightTuna/monitor_control.git 
 cd monitor_control
-sudo apt install ddcutil
-/usr/bin/python3 -m pip install -r requirements.txt
+sudo apt install ddcutil python-pip -y
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+sed -e "s/\${DIR}/$(pwd)/" monitor_control.service
 systemctl --user enable --now "$(pwd)/monitor_control.service"
 ```
 

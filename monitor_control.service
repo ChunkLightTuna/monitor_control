@@ -3,8 +3,8 @@
 Description=Toggle Monitor Input from Keypad
 
 [Service]
-WorkingDirectory=/home/pi/monitor_control
-ExecStart=/home/pi/monitor_control/main.py
+WorkingDirectory=${DIR}
+ExecStart=${DIR}/venv/bin/python ${DIR}/main.py
 
 [Install]
 WantedBy=multi-user.target
