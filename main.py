@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 import logging
 
+from dotenv import load_dotenv
+
 import display
 import server
 from keypad import Pad
-from kvm import Monitor, DP_1, HDMI_1
+from kvm import Monitor
 
 pad = Pad()
 buttons = pad.buttons
@@ -84,8 +86,11 @@ class UI:
 
 if __name__ == "__main__":
 
+    load_dotenv()
+
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
+
     monitor.kvm_start()
 
     for button in buttons.values():
@@ -97,8 +102,8 @@ if __name__ == "__main__":
     buttons['*'].when_pressed = ui.pop
     buttons['A'].when_pressed = lambda: ui.audio_mode('A')
     buttons['B'].when_pressed = lambda: ui.brightness_mode('B')
-    buttons['C'].when_pressed = lambda: monitor.switch(HDMI_1)
-    buttons['D'].when_pressed = lambda: monitor.switch(DP_1)
+    buttons['C'].when_pressed = lambda: monitor.switch(monitor.display_2)
+    buttons['D'].when_pressed = lambda: monitor.switch(monitor.display_1)
 
     pad.start()
 
