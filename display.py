@@ -1,21 +1,22 @@
 #!/usr/bin/python3
 
+import os
 import sys
 from pprint import pprint
 
 import adafruit_character_lcd.character_lcd as characterlcd
-import board
 import digitalio
+from adafruit_blinka.microcontroller.bcm283x.pin import Pin
 
-# vss = GND (Position 2 or 4)
-# vdd = 5V (Position 6,9,14,20,30,34 or 39)
+# vss = GND (https://pinout.xyz/pinout/ground)
+# vdd = 5V (https://pinout.xyz/pinout/5v_power)
 # v0 = middle of trimpot
-rs = digitalio.DigitalInOut(board.D21)
-en = digitalio.DigitalInOut(board.D16)
-d4 = digitalio.DigitalInOut(board.D19)
-d5 = digitalio.DigitalInOut(board.D22)
-d6 = digitalio.DigitalInOut(board.D24)
-d7 = digitalio.DigitalInOut(board.D14)
+rs = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_RS'))))
+en = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_EN'))))
+d4 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D4'))))
+d5 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D5'))))
+d6 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D6'))))
+d7 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D7'))))
 
 columns = 16
 rows = 2
@@ -38,8 +39,10 @@ down_arrow = '\x04'
 lcd.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])
 
 if __name__ == "__main__":
-    argv = sys.argv
+    from dotenv import load_dotenv
 
-    pprint(argv)
+    load_dotenv()
+
+    pprint(sys.argv)
     lcd.clear()
     lcd.message = sys.argv[-1]

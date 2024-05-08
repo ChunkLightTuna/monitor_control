@@ -1,19 +1,18 @@
 #!/usr/bin/python3
 
+import os
 import subprocess
 from signal import pause
 
 from gpiozero import Button
-
-HDMI_1 = ("HDMI 1", "0x11")
-DP_1 = ("DisplayPort 1", "0x0f")
-DP_2 = ("DisplayPort 2", "0x10")
 
 button = Button(17)
 
 
 class Monitor:
     def __init__(self, log=print):
+        self.display_1 = (os.getenv('DISPLAY_1_LABEL'), f"0x{os.getenv('DISPLAY_1_ID')}")
+        self.display_2 = (os.getenv('DISPLAY_2_LABEL'), f"0x{os.getenv('DISPLAY_2_ID')}")
         self.log = log
 
     def switch(self, device):
@@ -32,8 +31,8 @@ class Monitor:
 
     def kvm_start(self):
         self.log("kvm start")
-        button.when_released = lambda: self.switch(DP_1)
-        button.when_pressed = lambda: self.switch(HDMI_1)
+        button.when_released = lambda: self.switch(self.display_1)
+        button.when_pressed = lambda: self.switch(self.display_2)
 
     def kvm_stop(self):
         self.log("kvm stop")
@@ -42,6 +41,10 @@ class Monitor:
 
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
     monitor = Monitor()
     monitor.kvm_start()
     pause()

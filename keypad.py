@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 import logging
+import os
 from signal import pause
 
 from gpiozero import DigitalInputDevice, DigitalOutputDevice
 from gpiozero.threads import GPIOThread
 
 
-class SyntheticButton():
+class SyntheticButton:
     def __init__(self, label):
         self._value = 0
         self.label = label
@@ -32,8 +33,7 @@ class SyntheticButton():
 class Pad:
 
     def __init__(self):
-        col_pins = [2, 3, 4, 5],
-        row_pins = [6, 7, 8, 9],
+        col_pins, row_pins = [[f"BOARD{os.getenv(f'KEYPAD_{j}_{i}')}" for i in range(1, 5)] for j in ['COL', 'ROW']]
         labels = [
             ['1', '2', '3', 'A'],
             ['4', '5', '6', 'B'],
@@ -87,6 +87,9 @@ class Pad:
 
 
 if __name__ == "__main__":
+    from dotenv import load_dotenv
+
+    load_dotenv()
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)

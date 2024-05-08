@@ -70,6 +70,9 @@ def run(msg_f):
 
 
 if __name__ == '__main__':
+    from dotenv import load_dotenv
+
+    load_dotenv()
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
