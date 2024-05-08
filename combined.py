@@ -27,7 +27,7 @@ monitor = Monitor(msg)
 
 class UI:
     def __init__(self):
-        self.settings = []
+        self.stack = []
         self.title = f"Main Menu     2{display.up_arrow}\n              8{display.down_arrow}"
         msg(self.title)
 
@@ -67,14 +67,14 @@ class UI:
 
     def push(self):
         logging.debug("push")
-        self.settings.append(
+        self.stack.append(
             (dict([(button.label, button.when_pressed) for button in buttons.values()]), self.title)
         )
 
     def pop(self):
         logging.debug("pop")
-        if self.settings:
-            (actions, title) = self.settings.pop()
+        if self.stack:
+            (actions, title) = self.stack.pop()
             for (label, when_pressed) in actions.items():
                 buttons[label].when_pressed = when_pressed
             self.set_title(title)
@@ -84,9 +84,8 @@ class UI:
 
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
     monitor.kvm_start()
 
     for button in buttons.values():

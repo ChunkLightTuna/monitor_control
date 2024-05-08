@@ -7,6 +7,9 @@ import adafruit_character_lcd.character_lcd as characterlcd
 import board
 import digitalio
 
+# vss = GND (Position 2 or 4)
+# vdd = 5V (Position 6,9,14,20,30,34 or 39)
+# v0 = middle of trimpot
 rs = digitalio.DigitalInOut(board.D21)
 en = digitalio.DigitalInOut(board.D16)
 d4 = digitalio.DigitalInOut(board.D19)

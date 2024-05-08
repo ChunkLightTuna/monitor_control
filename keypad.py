@@ -31,19 +31,15 @@ class SyntheticButton():
 
 class Pad:
 
-    def __init__(self,
-                 col_pins=[2, 3, 4, 5],
-                 row_pins=[6, 7, 8, 9],
-                 labels=[
-                     ['1', '2', '3', 'A'],
-                     ['4', '5', '6', 'B'],
-                     ['7', '8', '9', 'C'],
-                     ['*', '0', '#', 'D']]
-                 ):
-
-        assert (len(labels) == len(row_pins))
-        assert (len(labels[0]) == len(col_pins))
-        assert (all(len(labels[0]) == len(label_row) for label_row in labels))
+    def __init__(self):
+        col_pins = [2, 3, 4, 5],
+        row_pins = [6, 7, 8, 9],
+        labels = [
+            ['1', '2', '3', 'A'],
+            ['4', '5', '6', 'B'],
+            ['7', '8', '9', 'C'],
+            ['*', '0', '#', 'D']
+        ]
 
         self._cols = [DigitalOutputDevice(pin) for pin in col_pins]
         self._rows = [DigitalInputDevice(pin) for pin in row_pins]

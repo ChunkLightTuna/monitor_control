@@ -7,6 +7,7 @@ from gpiozero import Button
 
 HDMI_1 = ("HDMI 1", "0x11")
 DP_1 = ("DisplayPort 1", "0x0f")
+DP_2 = ("DisplayPort 2", "0x10")
 
 button = Button(17)
 

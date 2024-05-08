@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <title>16x2</title>
     <style>
+        body {
+            height: 100vh;
+            align-content: center;
+            margin: 0;
+        }
+
         form {
             display: flex;
             align-items: center;
@@ -14,19 +20,27 @@
 
         input {
             width: 16ch;
+            font-size: 7vw;
         }
 
-        #submit {
-            width: 17ch;
+        input.text {
+            padding-left: 1ch;
+        }
+
+        input.submit {
+            width: 17.2ch;
             margin: 1ch;
+
         }
     </style>
 </head>
 <body>
 <form id="form" autocomplete="off">
-    <input type="text" id="line_one" maxlength="16" placeholder="Two Lines">
-    <input type="text" id="line_two" maxlength="16" placeholder="16 Chars Each">
-    <input type="submit" id="submit" value="Send">
+    <label for="line_one">Line One</label>
+    <input type="text" class="text" id="line_one" maxlength="16" placeholder="Two Lines">
+    <label for="line_two">Line Two</label>
+    <input type="text" class="text" id="line_two" maxlength="16" placeholder="16 Chars Each">
+    <input type="submit" class="submit" value="Send">
 </form>
 <script>
     document.getElementById('form').onsubmit = function () {
