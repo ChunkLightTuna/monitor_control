@@ -1,7 +1,5 @@
 import logging
 
-from dotenv import load_dotenv
-
 import display
 import server
 from keypad import Pad
@@ -68,9 +66,10 @@ class UI:
 
     def push(self):
         logging.debug("push")
-        self.stack.append(
-            (dict([(button.label, button.when_pressed) for button in buttons.values()]), self.title)
-        )
+        self.stack.append((
+            dict([(button.label, button.when_pressed) for button in buttons.values()]),
+            self.title
+        ))
 
     def pop(self):
         logging.debug("pop")
@@ -85,15 +84,13 @@ class UI:
 
 if __name__ == "__main__":
 
-    load_dotenv()
-
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
 
     monitor.kvm_start()
 
-    for button in buttons.values():
-        button.when_pressed = msg_gen(f"{button.label} unmapped")
+    for b in buttons.values():
+        b.when_pressed = msg_gen(f"{b.label} unmapped")
 
     ui = UI()
     buttons['2'].when_pressed = msg_gen("      lol")
@@ -101,8 +98,8 @@ if __name__ == "__main__":
     buttons['*'].when_pressed = ui.pop
     buttons['A'].when_pressed = lambda: ui.audio_mode('A')
     buttons['B'].when_pressed = lambda: ui.brightness_mode('B')
-    buttons['C'].when_pressed = lambda: monitor.switch(monitor.display_2)
-    buttons['D'].when_pressed = lambda: monitor.switch(monitor.display_1)
+    buttons['C'].when_pressed = lambda: monitor.switch(monitor.prev())
+    buttons['D'].when_pressed = lambda: monitor.switch(monitor.next())
 
     pad.start()
 

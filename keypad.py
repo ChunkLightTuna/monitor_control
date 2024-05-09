@@ -1,6 +1,6 @@
 #!/usr/bin/python3
+import json
 import logging
-import os
 from signal import pause
 
 from gpiozero import DigitalInputDevice, DigitalOutputDevice
@@ -33,7 +33,9 @@ class SyntheticButton:
 class Pad:
 
     def __init__(self):
-        col_pins, row_pins = [[f"BOARD{os.getenv(f'KEYPAD_{j}_{i}')}" for i in range(1, 5)] for j in ['COL', 'ROW']]
+        with open('pins.json') as f:
+            pins = json.load(f)['keypad_board_pins']
+
         labels = [
             ['1', '2', '3', 'A'],
             ['4', '5', '6', 'B'],
@@ -41,8 +43,8 @@ class Pad:
             ['*', '0', '#', 'D']
         ]
 
-        self._cols = [DigitalOutputDevice(pin) for pin in col_pins]
-        self._rows = [DigitalInputDevice(pin) for pin in row_pins]
+        self._cols = [DigitalOutputDevice(pin) for pin in pins['col']]
+        self._rows = [DigitalInputDevice(pin) for pin in pins['row']]
 
         self._labels = labels
 
@@ -87,9 +89,6 @@ class Pad:
 
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-
-    load_dotenv()
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)

@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-
-import os
+import json
 import sys
 from pprint import pprint
 
@@ -8,15 +7,18 @@ import adafruit_character_lcd.character_lcd as characterlcd
 import digitalio
 from adafruit_blinka.microcontroller.bcm283x.pin import Pin
 
+with open('pins.json') as f:
+    pins = json.load(f)['display_board_pins']
+
 # vss = GND (https://pinout.xyz/pinout/ground)
 # vdd = 5V (https://pinout.xyz/pinout/5v_power)
 # v0 = middle of trimpot
-rs = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_RS'))))
-en = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_EN'))))
-d4 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D4'))))
-d5 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D5'))))
-d6 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D6'))))
-d7 = digitalio.DigitalInOut(Pin(int(os.getenv('DISPLAY_D7'))))
+rs = digitalio.DigitalInOut(Pin(pins['RS']))
+en = digitalio.DigitalInOut(Pin(pins['EN']))
+d4 = digitalio.DigitalInOut(Pin(pins['D4']))
+d5 = digitalio.DigitalInOut(Pin(pins['D5']))
+d6 = digitalio.DigitalInOut(Pin(pins['D6']))
+d7 = digitalio.DigitalInOut(Pin(pins['D7']))
 
 columns = 16
 rows = 2
@@ -39,10 +41,6 @@ down_arrow = '\x04'
 lcd.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
     pprint(sys.argv)
     lcd.clear()
     lcd.message = sys.argv[-1]

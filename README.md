@@ -20,9 +20,15 @@ These can be found using with `ddcutil` using\
  `ddcutil capabilities | awk '/Feature: 60 \(Input Source\)/{p=1} /^   Feature: 62/{p=0} p'`
 
 ```bash
-git clone https://github.com/ChunkLightTuna/monitor_control.git 
+# See https://www.ddcutil.com/raspberry/
+echo "dtparam=i2c2_iknowwhatimdoing" | sudo tee -a /boot/firmware/config.txt
+sudo reboot now
+```
+````bash
+sudo apt install ddcutil python3-pip git -y
+git clone https://github.com/ChunkLightTuna/monitor_control.git
 cd monitor_control
-sudo apt install ddcutil python-pip -y
+
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt

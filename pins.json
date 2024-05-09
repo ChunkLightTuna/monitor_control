@@ -1,0 +1,34 @@
+{
+  "display_board_pins": {
+    "RS": 40,
+    "EN": 36,
+    "D4": 35,
+    "D5": 15,
+    "D6": 18,
+    "D7": 8
+  },
+  "keypad_board_pins": {
+    "cols": [
+      3,
+      5,
+      7,
+      29
+    ],
+    "rows": [
+      31,
+      26,
+      24,
+      21
+    ]
+  },
+  "displays": [
+    {
+      "label": "DisplayPort-1",
+      "id": "0x0f"
+    },
+    {
+      "label": "HDMI-1",
+      "id": "0x11"
+    }
+  ]
+}
