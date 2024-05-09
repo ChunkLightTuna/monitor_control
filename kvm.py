@@ -4,9 +4,7 @@ import subprocess
 from dataclasses import dataclass
 from signal import pause
 
-from gpiozero import Button
-
-button = Button(17)
+from gpiozero import Button, DigitalInputDevice, DigitalOutputDevice
 
 
 @dataclass
@@ -18,10 +16,13 @@ class Display:
 class Monitor:
     def __init__(self, log=print):
         with open('pinout.json') as f:
-            displays = json.load(f)['displays'] or None
+            pinout = json.load(f)
 
-        if self.displays:
-            self.displays = [Display(**display) for display in displays]
+        self.kvm_in = DigitalInputDevice(pinout['kvm']['in'])
+        self.kvm_out = DigitalOutputDevice(pinout['kvm']['out'])
+
+        if 'displays' in pinout:
+            self.displays = [Display(**display) for display in pinout['displays']]
         else:
             capabilities = subprocess.run(["ddcutil", "capabilities"], stdout=subprocess.PIPE).stdout.decode('utf-8')
             self.displays = [
@@ -68,13 +69,13 @@ class Monitor:
 
     def kvm_start(self):
         self.log("kvm start")
-        button.when_released = lambda: self.switch(self.displays[0])
-        button.when_pressed = lambda: self.switch(self.displays[1])
+        self.kvm_button.when_released = lambda: self.switch(self.displays[0])
+        self.kvm_button.when_pressed = lambda: self.switch(self.displays[1])
 
     def kvm_stop(self):
         self.log("kvm stop")
-        button.when_released = lambda: None
-        button.when_pressed = lambda: None
+        self.kvm_button.when_released = lambda: None
+        self.kvm_button.when_pressed = lambda: None
 
 
 if __name__ == "__main__":
