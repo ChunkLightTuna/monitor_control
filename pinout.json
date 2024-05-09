@@ -1,24 +1,24 @@
 {
-  "display_board_pins": {
-    "RS": 40,
-    "EN": 36,
-    "D4": 35,
-    "D5": 15,
-    "D6": 18,
-    "D7": 8
+  "display_bcm_pins": {
+    "RS": 21,
+    "EN": 16,
+    "D4": 19,
+    "D5": 22,
+    "D6": 24,
+    "D7": 14
   },
-  "keypad_board_pins": {
+  "keypad_bcm_pins": {
     "cols": [
+      2,
       3,
-      5,
-      7,
-      29
+      4,
+      5
     ],
     "rows": [
-      31,
-      26,
-      24,
-      21
+      6,
+      7,
+      8,
+      9
     ]
   },
   "displays": [

@@ -33,8 +33,8 @@ class SyntheticButton:
 class Pad:
 
     def __init__(self):
-        with open('pins.json') as f:
-            pins = json.load(f)['keypad_board_pins']
+        with open('pinout.json') as f:
+            pins = json.load(f)['keypad_bcm_pins']
 
         labels = [
             ['1', '2', '3', 'A'],

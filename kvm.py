@@ -17,7 +17,7 @@ class Display:
 
 class Monitor:
     def __init__(self, log=print):
-        with open('pins.json') as f:
+        with open('pinout.json') as f:
             displays = json.load(f)['displays'] or None
 
         if self.displays:

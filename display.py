@@ -7,8 +7,8 @@ import adafruit_character_lcd.character_lcd as characterlcd
 import digitalio
 from adafruit_blinka.microcontroller.bcm283x.pin import Pin
 
-with open('pins.json') as f:
-    pins = json.load(f)['display_board_pins']
+with open('pinout.json') as f:
+    pins = json.load(f)['display_bcm_pins']
 
 # vss = GND (https://pinout.xyz/pinout/ground)
 # vdd = 5V (https://pinout.xyz/pinout/5v_power)
