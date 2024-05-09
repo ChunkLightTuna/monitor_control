@@ -43,8 +43,8 @@ class Pad:
             ['*', '0', '#', 'D']
         ]
 
-        self._cols = [DigitalOutputDevice(pin) for pin in pins['col']]
-        self._rows = [DigitalInputDevice(pin) for pin in pins['row']]
+        self._cols = [DigitalOutputDevice(pin) for pin in pins['cols']]
+        self._rows = [DigitalInputDevice(pin) for pin in pins['rows']]
 
         self._labels = labels
 
