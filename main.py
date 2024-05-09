@@ -87,9 +87,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
 
-    if monitor.kvm_button:
-        monitor.kvm_start()
-
     for b in buttons.values():
         b.when_pressed = msg_gen(f"{b.label} unmapped")
 

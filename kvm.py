@@ -4,8 +4,6 @@ import subprocess
 from dataclasses import dataclass
 from signal import pause
 
-from gpiozero import Button, DigitalInputDevice, DigitalOutputDevice
-
 
 @dataclass
 class Display:
@@ -18,8 +16,9 @@ class Monitor:
         with open('pinout.json') as f:
             pinout = json.load(f)
 
-        self.kvm_in = DigitalInputDevice(pinout['kvm']['in'])
-        self.kvm_out = DigitalOutputDevice(pinout['kvm']['out'])
+        # When you get around to using a KVM again
+        # self.kvm_in = DigitalInputDevice(pinout['kvm']['in'])  # wire to KVM VGA ground/float
+        # self.kvm_out = DigitalOutputDevice(pinout['kvm']['out'])  # wire to KVM button
 
         if 'displays' in pinout:
             self.displays = [Display(**display) for display in pinout['displays']]
@@ -67,18 +66,7 @@ class Monitor:
         self.log(f'VOLUME:\n  {v}%')
         subprocess.run(["ddcutil", "setvcp", "0x62", v])
 
-    def kvm_start(self):
-        self.log("kvm start")
-        self.kvm_button.when_released = lambda: self.switch(self.displays[0])
-        self.kvm_button.when_pressed = lambda: self.switch(self.displays[1])
-
-    def kvm_stop(self):
-        self.log("kvm stop")
-        self.kvm_button.when_released = lambda: None
-        self.kvm_button.when_pressed = lambda: None
-
 
 if __name__ == "__main__":
     monitor = Monitor()
-    monitor.kvm_start()
     pause()
