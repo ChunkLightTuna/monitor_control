@@ -24,7 +24,7 @@ These can be found using with `ddcutil` using\
 echo "dtparam=i2c2_iknowwhatimdoing" | sudo tee -a /boot/firmware/config.txt
 sudo reboot now
 ```
-````bash
+```bash
 sudo apt install ddcutil python3-pip git -y
 git clone https://github.com/ChunkLightTuna/monitor_control.git
 cd monitor_control
