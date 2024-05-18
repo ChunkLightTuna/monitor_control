@@ -28,7 +28,6 @@ sudo reboot now
 sudo apt install ddcutil python3-pip git -y
 git clone https://github.com/ChunkLightTuna/monitor_control.git
 cd monitor_control
-
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
