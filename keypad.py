@@ -1,74 +1,61 @@
-#!/usr/bin/python3
 import json
 import logging
-from signal import pause
+import signal
+from dataclasses import dataclass
+from threading import Thread
 
-from gpiozero import DigitalInputDevice, DigitalOutputDevice
-from gpiozero.threads import GPIOThread
+from adafruit_blinka.microcontroller.bcm283x.pin import Pin
+from digitalio import DigitalInOut
 
 
+@dataclass
 class SyntheticButton:
-    def __init__(self, label):
-        self._value = 0
+    label: str
+    when_pressed: callable
+    value: bool = False
+
+    def __init__(self, label: str):
         self.label = label
-        self._when_pressed = lambda: logging.info(f"{label} pressed")
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        self._value = value
-
-    @property
-    def when_pressed(self):
-        return self._when_pressed
-
-    @when_pressed.setter
-    def when_pressed(self, fun):
-        self._when_pressed = fun
+        self.when_pressed = lambda: logging.info(f"{label} pressed")
 
 
 class Pad:
+    labels = [
+        ['1', '2', '3', 'A'],
+        ['4', '5', '6', 'B'],
+        ['7', '8', '9', 'C'],
+        ['*', '0', '#', 'D']
+    ]
 
     def __init__(self):
         with open('pinout.json') as f:
             pins = json.load(f)['keypad_bcm_pins']
 
-        labels = [
-            ['1', '2', '3', 'A'],
-            ['4', '5', '6', 'B'],
-            ['7', '8', '9', 'C'],
-            ['*', '0', '#', 'D']
+        self.cols = [DigitalInOut(Pin(pin)) for pin in pins['cols']]
+        self.rows = [DigitalInOut(Pin(pin)) for pin in pins['rows']]
+        for pin in self.cols:
+            pin.switch_to_output()
+
+        self._buttons = [
+            [SyntheticButton(self.labels[ri][ci]) for ci, _ in enumerate(self.cols)]
+            for ri, _ in enumerate(self.rows)
         ]
-
-        self._cols = [DigitalOutputDevice(pin) for pin in pins['cols']]
-        self._rows = [DigitalInputDevice(pin) for pin in pins['rows']]
-
-        self._labels = labels
-
-        self._buttons = [[SyntheticButton(self._labels[row][col]) for col in range(len(self._cols))] for row in
-                         range(len(self._rows))]
 
         self._event_thread = None
         self._event_delay = .02  # 50hz takes 40% cpu!
-
-        self._col_range = range(len(self._cols))
-        self._row_range = range(len(self._rows))
 
     @property
     def buttons(self):
         return dict([(button.label, button) for row in self._buttons for button in row])
 
     def _scan(self):
-        for row in self._row_range:
-            for col in self._col_range:
-                self._cols[col].value = 1
-                new = self._rows[row].value
-                self._cols[col].value = 0
+        for row_i, row in enumerate(self.rows):
+            for col_i, col in enumerate(self.cols):
+                col.value = True
+                new = row.value
+                col.value = False
 
-                button = self._buttons[row][col]
+                button = self._buttons[row_i][col_i]
                 if button.value ^ new:
                     button.value = new
                     # should be in another thread?
@@ -80,7 +67,7 @@ class Pad:
             self._scan()
 
     def start(self):
-        self._event_thread = GPIOThread(target=self._event_loop)
+        self._event_thread = Thread(target=self._event_loop)
         self._event_thread.start()
 
     def stop(self):
@@ -95,4 +82,4 @@ if __name__ == "__main__":
     pad = Pad()
     pad.start()
 
-    pause()
+    signal.pause()

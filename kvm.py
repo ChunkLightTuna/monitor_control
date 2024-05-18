@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import json
 import subprocess
 from dataclasses import dataclass
