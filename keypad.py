@@ -57,8 +57,8 @@ class Keypad:
             while True:
                 for col_i, col in cols:
                     col.value = True
-                    await asyncio.sleep(wait)
                     for row_i, row in rows:
+                        await asyncio.sleep(wait)
                         row.update()
                         new = row.value
                         button = self._buttons[row_i][col_i]
