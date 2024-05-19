@@ -5,7 +5,7 @@ import server
 from keypad import Keypad
 from kvm import KVM
 from lcd import LCD
-from ui import Menu
+from menu import Menu
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
