@@ -64,14 +64,17 @@ class Keypad:
                         button = self._buttons[row_i][col_i]
                         print(f'{button.label=} {button.value=} {new=}')
                         if button.value ^ new:
-
+                            print('a')
                             button.value = new
+                            print('b')
                             if new:
                                 button.press()
-                    print('a')
+                                print('c')
+                            print('d')
+                    print('e')
                     col.value = False
-                    print('b')
-                print('c')
+                    print('f')
+                print('g')
 
         event_loop.create_task(f())
         event_loop.run_forever()
