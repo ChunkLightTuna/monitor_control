@@ -51,7 +51,7 @@ class Keypad:
         event_loop = asyncio.get_event_loop()
 
         async def f():
-            wait = 1 / 8
+            wait = 1 / 800
             r = range(4)
             while True:
                 for col in r:
@@ -61,8 +61,8 @@ class Keypad:
                         self.rows[row].update()
                         new = self.rows[row].value
                         button = self._buttons[row][col]
-                        print(f'{button.label=} {button.value=} {new=}')
                         if button.value ^ new:
+                            print(f'{button.label=} {button.value=} {new=}')
                             button.value = new
                             if new:
                                 button.press()
