@@ -3,7 +3,7 @@ import json
 import logging
 from dataclasses import dataclass
 
-from digitalio import DigitalInOut, Pin
+from digitalio import Pin
 from keypad import KeyMatrix
 
 
@@ -30,10 +30,9 @@ class Keypad:
         with open('pinout.json') as f:
             pins = json.load(f)['keypad_bcm_pins']
 
-        self.cols = [DigitalInOut(Pin(pin)) for pin in pins['cols']]
         self.matrix = KeyMatrix(
-            (Pin(p) for p in pins['rows']),
-            (Pin(p) for p in pins['cols']),
+            [Pin(p) for p in pins['rows']],
+            [Pin(p) for p in pins['cols']]
         )
 
     def run(self):
