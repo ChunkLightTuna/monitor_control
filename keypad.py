@@ -48,26 +48,27 @@ class Keypad:
     def buttons(self):
         return dict([(button.label, button) for row in self._buttons for button in row])
 
-    async def _scan(self):
-        for col_i, col in enumerate(self.cols):
-            col.value = True
-            await asyncio.sleep(0.0015)
-            for row_i, row in enumerate(self.rows):
-                row.update()
-                new = row.value
-                button = self._buttons[row_i][col_i]
-                if button.value ^ new:
-                    button.value = new
-                    if new:
-                        button.press()
-            col.value = False
-
     def run(self):
         event_loop = asyncio.get_event_loop()
 
         async def f():
+            wait = 1 / 800
+            cols = enumerate(self.cols)
+            rows = enumerate(self.rows)
             while True:
-                await self._scan()
+                for col_i, col in cols:
+                    col.value = True
+                    await asyncio.sleep(wait)
+                    for row_i, row in rows:
+                        row.update()
+                        new = row.value
+                        button = self._buttons[row_i][col_i]
+                        if button.value ^ new:
+                            print(f'{button.value=} {button.label=} {new=}')
+                            button.value = new
+                            if new:
+                                button.press()
+                    col.value = False
 
         event_loop.create_task(f())
         event_loop.run_forever()
@@ -81,10 +82,10 @@ if __name__ == "__main__":
 
     print('row pins:')
     for p in pad.rows:
-        pprint(p.__dict__)
+        pprint([(k, v) for k, v in p.__dict__ if not k.startswith('_')])
 
     print('col pins:')
     for p in pad.rows:
-        pprint(p.__dict__)
+        pprint([(k, v) for k, v in p.__dict__ if not k.startswith('_')])
 
     pad.run()
