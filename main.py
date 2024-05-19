@@ -1,4 +1,3 @@
-import logging
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -9,9 +8,6 @@ from kvm import KVM
 from lcd import LCD
 from menu import Menu
 from pad import Keypad
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger()
 
 keypad = Keypad()
 lcd = LCD()
@@ -24,7 +20,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-app.state.lcd = lcd
+server.state.lcd = lcd
 app.include_router(server.router)
 
 if __name__ == '__main__':

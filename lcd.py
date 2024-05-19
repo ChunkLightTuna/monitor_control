@@ -1,4 +1,5 @@
 import json
+import logging
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -41,10 +42,13 @@ class Message:
         self.line_two = f"{self.line_two:<16}"[:14] + '8' + down_arrow
         return self
 
+    def __repr__(self):
+        return f'{self.line_one}\n{self.line_two}'
+
 
 class Messageable:
     def msg(self, message: Message, align: Align = Align.NONE):
-        pass
+        logging.debug(message)
 
 
 class LCD(Character_LCD_Mono, Messageable):
