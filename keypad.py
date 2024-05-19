@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from pprint import pprint
 
+from adafruit_debouncer import Debouncer
 from digitalio import DigitalInOut, Pin
 
 
@@ -25,16 +26,18 @@ class Keypad:
         ['7', '8', '9', 'C'],
         ['*', '0', '#', 'D']
     ]
-    _event_delay = 1 / 800
 
     def __init__(self):
         with open('pinout.json') as f:
             pins = json.load(f)['keypad_bcm_pins']
 
         self.cols = [DigitalInOut(Pin(pin)) for pin in pins['cols']]
-        self.rows = [DigitalInOut(Pin(pin)) for pin in pins['rows']]
         for pin in self.cols:
             pin.switch_to_output()
+        self.rows = [
+            Debouncer(DigitalInOut(Pin(pin)))
+            for pin in pins['rows']
+        ]
 
         self._buttons = [
             [SyntheticButton(self.labels[ri][ci]) for ci, _ in enumerate(self.cols)]
@@ -46,19 +49,17 @@ class Keypad:
         return dict([(button.label, button) for row in self._buttons for button in row])
 
     async def _scan(self):
-        for row_i, row in enumerate(self.rows):
-            for col_i, col in enumerate(self.cols):
-                col.value = True
+        for col_i, col in enumerate(self.cols):
+            col.value = True
+            for row_i, row in enumerate(self.rows):
+                row.update()
                 new = row.value
-                col.value = False
-
                 button = self._buttons[row_i][col_i]
                 if button.value ^ new:
                     button.value = new
                     if new:
                         button.press()
-
-                await asyncio.sleep(self._event_delay)
+            col.value = False
 
     def run(self):
         event_loop = asyncio.get_event_loop()
