@@ -58,4 +58,6 @@ async def post(request: Request):
 if __name__ == '__main__':
     app = FastAPI()
     app.include_router(router)
-    uvicorn.run(app, port=1602)
+    import sys
+    port = int(sys.argv[-1]) if len(sys.argv) > 1 else 7680
+    uvicorn.run(app, port=port)
