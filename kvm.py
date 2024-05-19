@@ -3,6 +3,8 @@ import subprocess
 from dataclasses import dataclass
 from signal import pause
 
+from lcd import LCD
+
 
 @dataclass
 class Display:
@@ -10,14 +12,14 @@ class Display:
     label: str
 
 
-class Monitor:
-    def __init__(self, log=print):
+class KVM:
+    def __init__(self, lcd: LCD):
         with open('pinout.json') as f:
             pinout = json.load(f)
 
         # When you get around to using a KVM again
-        # self.kvm_in = DigitalInputDevice(pinout['kvm']['in'])  # wire to KVM VGA ground/float
-        # self.kvm_out = DigitalOutputDevice(pinout['kvm']['out'])  # wire to KVM button
+        # self.in = DigitalInputDevice(pinout['kvm']['in'])  # wire to KVM VGA ground/float
+        # self.out = DigitalOutputDevice(pinout['kvm']['out'])  # wire to KVM button
 
         if 'displays' in pinout:
             self.displays = [Display(**display) for display in pinout['displays']]
@@ -40,8 +42,7 @@ class Monitor:
         ).stdout.decode("utf-8").strip().split(" ")[-1]
 
         self.cur = next((idx for idx, d in enumerate(self.displays) if d.id == current_id), 0)
-
-        self.log = log
+        self.lcd = lcd
 
     def next(self):
         self.cur = (self.cur + 1) % len(self.displays)
@@ -52,20 +53,20 @@ class Monitor:
         self.switch(self.displays[self.cur])
 
     def switch(self, display: Display):
-        self.log(f"DISPLAY:\n  {display.label}")
+        self.lcd.msg('DISPLAY:', display.label)
         subprocess.run(["ddcutil", "setvcp", "0x60", display.id])
 
     def brightness(self, b: int):
         b = str(max(min(b, 100), 0))
-        self.log(f'BRIGHTNESS:\n  {b}%')
+        self.lcd.msg('BRIGHTNESS:', f'{b}%')
         subprocess.run(["ddcutil", "setvcp", "0x10", b])
 
     def volume(self, v: int):
         v = str(max(min(v, 100), 0))
-        self.log(f'VOLUME:\n  {v}%')
+        self.lcd.msg('VOLUME:', f'{v}%')
         subprocess.run(["ddcutil", "setvcp", "0x62", v])
 
 
 if __name__ == "__main__":
-    monitor = Monitor()
+    monitor = KVM()
     pause()

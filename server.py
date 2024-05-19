@@ -1,77 +1,62 @@
 import json
 import logging
-from http import HTTPStatus
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+import uvicorn
+from fastapi import HTTPException, Request, FastAPI, status
+from fastapi.responses import FileResponse, HTMLResponse, Response
+
+from lcd import Messageable
+
+app = FastAPI()
+with open('index.html', 'r') as f:
+    index = HTMLResponse(content=f.read())
+
+favicon = FileResponse(path='favicon.ico', media_type="text/x-favicon")
 
 
-def msg_fun(_):
-    pass
+@app.get("/favicon.ico")
+async def get_favicon():
+    return favicon
 
 
-class Handler(SimpleHTTPRequestHandler):
-    def version_string(self):
-        return "16x2"
-
-    def do_GET(self):
-        """Serve a GET request."""
-        if self.path != "/favicon.ico":
-            self.path = "index.html"
-
-        f = self.send_head()
-        if f:
-            try:
-                self.copyfile(f, self.wfile)
-            finally:
-                f.close()
-
-    def do_POST(self):
-        """Serve a POST request."""
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        try:
-            line_one, line_two = json.loads(post_data.decode('utf-8'))
-            if not line_one and not line_two:
-                self.send_error(HTTPStatus.BAD_REQUEST, "Both lines empty")
-            elif len(line_one) > 16 or len(line_two) > 16:
-                self.send_error(HTTPStatus.BAD_REQUEST, "Max 16 char per line")
-            else:
-                msg_fun(f"{line_one}\n{line_two}")
-                self.send_response(HTTPStatus.OK)
-                self.end_headers()
-
-        except Exception as e:
-            if 'not enough values to unpack' in repr(e):
-                self.send_error(HTTPStatus.BAD_REQUEST, "Ya gottta give me something")
-            else:
-                logging.error(repr(e))
-                self.send_error(HTTPStatus.INTERNAL_SERVER_ERROR, "Uhhhh")
+@app.get("/")
+async def get_index():
+    return index
 
 
-def run(msg_f):
-    server_address = ('', 1602)
-
-    if callable(msg_f):
-        logging.debug(f"msg_f is <{str(msg_f)}>")
-        global msg_fun
-        msg_fun = msg_f
-    else:
-        logging.error("msg_f not callable!")
-
-    httpd = ThreadingHTTPServer(server_address, Handler)
-    logging.info('Starting httpd...\n')
+@app.post("/")
+async def post(request: Request):
+    body = await request.body()
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    logging.info('Stopping httpd...\n')
+        line_one, line_two = json.loads(body.decode('utf-8'))
+        if not line_one and not line_two:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Both lines empty")
+        elif len(line_one) > 16 or len(line_two) > 16:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Max 16 char per line")
+        else:
+            app.state.lcd.msg(line_one, line_two)
+            return Response(status_code=status.HTTP_200_OK)
+    except Exception as e:
+        if 'not enough values to unpack' in repr(e):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Ya gotta give me something")
+        else:
+            logging.error(repr(e))
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+async def run(messageable: Messageable, port=1602):
+    app.state.lcd = messageable
+    uvicorn.run(app, port=port)
 
 
 if __name__ == '__main__':
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
-    run(lambda s: logging.debug(f"<<{s}>>"))
+
+
+    class Stub(Messageable):
+        def msg(self, line_one: str, line_two: str = None):
+            logging.debug(f'\n<<{line_one}>>\n<<{line_two}>>')
+
+
+    run(Stub())
