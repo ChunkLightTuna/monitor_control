@@ -52,16 +52,15 @@ class Keypad:
 
         async def f():
             wait = 1 / 8
-            cols = enumerate(self.cols)
-            rows = enumerate(self.rows)
+            r = range(4)
             while True:
-                for col_i, col in cols:
-                    col.value = True
-                    for row_i, row in rows:
+                for col in r:
+                    self.cols[col].value = True
+                    for row in range(4):
                         await asyncio.sleep(wait)
-                        row.update()
-                        new = row.value
-                        button = self._buttons[row_i][col_i]
+                        self.rows[row].update()
+                        new = self.rows[row].value
+                        button = self._buttons[row][col]
                         print(f'{button.label=} {button.value=} {new=}')
                         if button.value ^ new:
                             print('a')
@@ -72,7 +71,7 @@ class Keypad:
                                 print('c')
                             print('d')
                     print('e')
-                    col.value = False
+                    self.cols[col].value = False
                     print('f')
                 print('g')
 
