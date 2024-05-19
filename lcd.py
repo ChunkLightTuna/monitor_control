@@ -59,10 +59,10 @@ class LCD(Character_LCD_Mono, Messageable):
         super().__init__(
             rs=DigitalInOut(Pin(pins['RS'])),
             en=DigitalInOut(Pin(pins['EN'])),
-            d4=DigitalInOut(Pin(pins['D4'])),
-            d5=DigitalInOut(Pin(pins['D5'])),
-            d6=DigitalInOut(Pin(pins['D6'])),
-            d7=DigitalInOut(Pin(pins['D7'])),
+            db4=DigitalInOut(Pin(pins['D4'])),
+            db5=DigitalInOut(Pin(pins['D5'])),
+            db6=DigitalInOut(Pin(pins['D6'])),
+            db7=DigitalInOut(Pin(pins['D7'])),
             columns=16,
             rows=2
         )
