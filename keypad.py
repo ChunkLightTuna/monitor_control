@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from adafruit_debouncer import Debouncer
 from digitalio import DigitalInOut, Pin
 
-interval = 1 / 700
+interval = 1 / 100
 
 
 @dataclass
@@ -36,7 +36,7 @@ class Keypad:
         for pin in self.cols:
             pin.switch_to_output()
         self.rows = [
-            Debouncer(DigitalInOut(Pin(pin)), interval=interval)
+            Debouncer(DigitalInOut(Pin(pin)))
             for pin in pins['rows']
         ]
 
