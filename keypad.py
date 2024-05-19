@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from pprint import pprint
 
-zero = False
+from digitalio import DigitalInOut, Pin
 
 
 @dataclass
@@ -31,16 +31,10 @@ class Keypad:
         with open('pinout.json') as f:
             pins = json.load(f)['keypad_bcm_pins']
 
-        if zero:
-            from gpiozero import DigitalInputDevice, DigitalOutputDevice
-            self.cols = [DigitalOutputDevice(pin) for pin in pins['cols']]
-            self.rows = [DigitalInputDevice(pin) for pin in pins['rows']]
-        else:
-            from digitalio import DigitalInOut, Pin
-            self.cols = [DigitalInOut(Pin(pin)) for pin in pins['cols']]
-            self.rows = [DigitalInOut(Pin(pin)) for pin in pins['rows']]
-            for pin in self.cols:
-                pin.switch_to_output()
+        self.cols = [DigitalInOut(Pin(pin)) for pin in pins['cols']]
+        self.rows = [DigitalInOut(Pin(pin)) for pin in pins['rows']]
+        for pin in self.cols:
+            pin.switch_to_output()
 
         self._buttons = [
             [SyntheticButton(self.labels[ri][ci]) for ci, _ in enumerate(self.cols)]
@@ -94,11 +88,8 @@ if __name__ == "__main__":
     for p in pad.cols:
         p.switch_to_input()
 
-    if zero:
-        bad_pins = [i._pin.id for i in [*pad.cols, *pad.rows] if i.value]
-        assert not bad_pins
-    else:
-        pass
+    bad_pins = [i._pin.id for i in [*pad.cols, *pad.rows] if i.value]
+    assert not bad_pins
 
     for p in pad.cols:
         p.switch_to_output()
