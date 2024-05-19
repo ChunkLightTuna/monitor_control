@@ -54,19 +54,19 @@ class Keypad:
             wait = 1 / 800
             r = range(4)
             while True:
-                for col in r:
-                    self.cols[col].value = True
-                    for row in range(4):
+                for row in range(4):
+                    for col in r:
+                        self.cols[col].value = True
                         await asyncio.sleep(wait)
                         self.rows[row].update()
                         new = self.rows[row].value
+                        self.cols[col].value = False
                         button = self._buttons[row][col]
                         if button.value ^ new:
-                            print(f'{button.label=} {button.value=} {new=}')
+                            print(f'{button.label}:{int(button.value)}->{int(new)}')
                             button.value = new
                             if new:
                                 button.press()
-                    self.cols[col].value = False
 
         event_loop.create_task(f())
         event_loop.run_forever()
