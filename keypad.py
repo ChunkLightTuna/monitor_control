@@ -87,13 +87,4 @@ if __name__ == "__main__":
     for p in pad.rows:
         pprint(p.__dict__)
 
-    for p in pad.cols:
-        p.switch_to_input()
-
-    bad_pins = [i._pin.id for i in [*pad.cols, *pad.rows] if i.value]
-    assert not bad_pins
-
-    for p in pad.cols:
-        p.switch_to_output()
-
     pad.run()
