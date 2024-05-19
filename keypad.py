@@ -3,8 +3,7 @@ import json
 import logging
 from dataclasses import dataclass
 
-from adafruit_blinka.microcontroller.bcm283x.pin import Pin
-from digitalio import DigitalInOut
+from digitalio import DigitalInOut, Pin
 
 
 @dataclass
@@ -60,6 +59,7 @@ class Keypad:
 
     def run(self):
         event_loop = asyncio.get_event_loop()
+
         async def f():
             while True:
                 await self._scan()
