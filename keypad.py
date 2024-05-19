@@ -51,7 +51,7 @@ class Keypad:
     async def _scan(self):
         for col_i, col in enumerate(self.cols):
             col.value = True
-            asyncio.sleep(0.0015)
+            await asyncio.sleep(0.0015)
             for row_i, row in enumerate(self.rows):
                 row.update()
                 new = row.value
