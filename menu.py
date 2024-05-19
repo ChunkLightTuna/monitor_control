@@ -1,12 +1,12 @@
 import logging
 
-from keypad import Keypad
+from keypad import Pad
 from kvm import KVM
 from lcd import Message, Align, LCD
 
 
 class Menu:
-    def __init__(self, keypad: Keypad, kvm: KVM, lcd: LCD):
+    def __init__(self, keypad: Pad, kvm: KVM, lcd: LCD):
         self.stack = []
         self.title = Message('Main Menu').add_arrows()
         self.buttons = keypad.buttons
