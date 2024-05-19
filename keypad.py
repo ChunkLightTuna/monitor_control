@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from pprint import pprint
 
-zero = True
+zero = False
 
 
 @dataclass
@@ -25,7 +25,7 @@ class Keypad:
         ['7', '8', '9', 'C'],
         ['*', '0', '#', 'D']
     ]
-    _event_delay = .02  # 50hz takes 40% cpu!
+    _event_delay = 1 / 800
 
     def __init__(self):
         with open('pinout.json') as f:
@@ -64,13 +64,14 @@ class Keypad:
                     if new:
                         button.press()
 
+                await asyncio.sleep(self._event_delay)
+
     def run(self):
         event_loop = asyncio.get_event_loop()
 
         async def f():
             while True:
                 await self._scan()
-                await asyncio.sleep(self._event_delay)
 
         event_loop.create_task(f())
         event_loop.run_forever()
