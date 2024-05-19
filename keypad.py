@@ -68,7 +68,10 @@ class Keypad:
                             button.value = new
                             if new:
                                 button.press()
+                    print('a')
                     col.value = False
+                    print('b')
+                print('c')
 
         event_loop.create_task(f())
         event_loop.run_forever()
