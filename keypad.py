@@ -1,8 +1,8 @@
 import asyncio
 import json
 import logging
+import time
 from dataclasses import dataclass
-from time import time
 
 from adafruit_debouncer import Debouncer
 from digitalio import DigitalInOut, Pin
@@ -60,12 +60,12 @@ class Keypad:
                 for row in range(4):
                     for col in r:
                         self.cols[col].value = True
-                        a = time()
+                        a = time.time_ns()
                         self.rows[row].update()
-                        b = time()
+                        b = time.time_ns()
                         await asyncio.sleep(interval)
-                        c = time()
-                        print(f"{b - a} | {c - b} | {interval / 1000}")
+                        c = time.time_ns()
+                        print(f"{b - a} | {c - b} | {interval * 1e9}")
                         new = self.rows[row].value
                         self.cols[col].value = False
                         button = self._buttons[row][col]
