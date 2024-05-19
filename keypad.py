@@ -74,4 +74,14 @@ if __name__ == "__main__":
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     pad = Keypad()
+
+    for pin in pad.cols:
+        pin.switch_to_input()
+    bad_pins = [i._pin.id for i in [*pad.cols, *pad.rows] if i.value]
+    assert not bad_pins, f"Pins {', '.join(bad_pins)} unexpected value"
+
+
+    for pin in pad.cols:
+        pin.switch_to_output()
+
     pad.run()
