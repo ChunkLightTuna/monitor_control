@@ -62,8 +62,9 @@ class Keypad:
                         row.update()
                         new = row.value
                         button = self._buttons[row_i][col_i]
+                        print(f'{button.value=} {button.label=} {new=}')
                         if button.value ^ new:
-                            print(f'{button.value=} {button.label=} {new=}')
+
                             button.value = new
                             if new:
                                 button.press()
