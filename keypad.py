@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass
+from pprint import pprint
 
 from digitalio import DigitalInOut, Pin
 
@@ -75,11 +76,18 @@ if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
     pad = Keypad()
 
+    print('row pins:')
+    for pin in pad.rows:
+        pprint(pin)
+
+    print('col pins:')
+    for pin in pad.rows:
+        pprint(pin)
+
     for pin in pad.cols:
         pin.switch_to_input()
     bad_pins = [i._pin.id for i in [*pad.cols, *pad.rows] if i.value]
-    assert not bad_pins, f"Pins {', '.join(bad_pins)} unexpected value"
-
+    assert not bad_pins
 
     for pin in pad.cols:
         pin.switch_to_output()
