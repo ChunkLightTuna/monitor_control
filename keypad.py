@@ -51,7 +51,7 @@ class Keypad:
         event_loop = asyncio.get_event_loop()
 
         async def f():
-            wait = 1 / 80
+            wait = 1 / 8
             cols = enumerate(self.cols)
             rows = enumerate(self.rows)
             while True:
