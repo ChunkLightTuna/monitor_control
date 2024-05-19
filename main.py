@@ -1,5 +1,8 @@
-import asyncio
 import logging
+from contextlib import asynccontextmanager
+
+import uvicorn
+from fastapi import FastAPI
 
 import server
 from kvm import KVM
@@ -14,4 +17,15 @@ keypad = Keypad()
 lcd = LCD()
 ui = Menu(keypad, KVM(), LCD())
 
-asyncio.gather(keypad.run(), server.run(lcd))
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    keypad.run()
+
+
+app = FastAPI(lifespan=lifespan)
+app.state.lcd = lcd
+app.include_router(server.router)
+
+if __name__ == '__main__':
+    uvicorn.run(app, port=1602)

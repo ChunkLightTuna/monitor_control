@@ -38,22 +38,19 @@ class Keypad:
         self._buttons = [SyntheticButton(label) for label in self.labels]
         self.buttons = {button.label: button for button in self._buttons}
 
-    def run(self):
-        event_loop = asyncio.get_event_loop()
-
-        async def f():
-            while True:
-                event = self.matrix.events.get()
-                if event and event.pressed:
-                    self._buttons[event.key_number].press()
-                await asyncio.sleep(.001)
-
-        event_loop.create_task(f())
-        event_loop.run_forever()
+    async def run(self):
+        while True:
+            event = self.matrix.events.get()
+            if event and event.pressed:
+                self._buttons[event.key_number].press()
+            await asyncio.sleep(.001)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    Keypad().run()
+
+    event_loop = asyncio.get_event_loop()
+    event_loop.create_task(Keypad().run())
+    event_loop.run_forever()

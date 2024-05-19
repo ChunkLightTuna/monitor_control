@@ -2,29 +2,29 @@ import json
 import logging
 
 import uvicorn
-from fastapi import HTTPException, Request, FastAPI, status
+from fastapi import HTTPException, Request, FastAPI, status, APIRouter
 from fastapi.responses import FileResponse, HTMLResponse, Response
 
 from lcd import Messageable
 
-app = FastAPI()
+router = APIRouter()
 with open('index.html', 'r') as f:
     index = HTMLResponse(content=f.read())
 
 favicon = FileResponse(path='favicon.ico', media_type="text/x-favicon")
 
 
-@app.get("/favicon.ico")
+@router.get("/favicon.ico")
 async def get_favicon():
     return favicon
 
 
-@app.get("/")
+@router.get("/")
 async def get_index():
     return index
 
 
-@app.post("/")
+@router.post("/")
 async def post(request: Request):
     body = await request.body()
     try:
@@ -34,7 +34,7 @@ async def post(request: Request):
         elif len(line_one) > 16 or len(line_two) > 16:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Max 16 char per line")
         else:
-            app.state.lcd.msg(line_one, line_two)
+            request.app.state.lcd.msg(line_one, line_two)
             return Response(status_code=status.HTTP_200_OK)
     except Exception as e:
         if 'not enough values to unpack' in repr(e):
@@ -42,11 +42,6 @@ async def post(request: Request):
         else:
             logging.error(repr(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-async def run(messageable: Messageable, port=1602):
-    app.state.lcd = messageable
-    uvicorn.run(app, port=port)
 
 
 if __name__ == '__main__':
@@ -59,4 +54,6 @@ if __name__ == '__main__':
             logging.debug(f'\n<<{line_one}>>\n<<{line_two}>>')
 
 
-    run(Stub())
+    app = FastAPI()
+    app.state.lcd = Stub()
+    uvicorn.run(app, port=1602)
