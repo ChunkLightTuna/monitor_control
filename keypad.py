@@ -65,7 +65,7 @@ class Keypad:
                         b = time()
                         await asyncio.sleep(interval)
                         c = time()
-                        print(f"{a=} {b=} {c=} interval='{interval / 1000}'")
+                        print(f"{b - a} | {c - b} | {interval / 1000}")
                         new = self.rows[row].value
                         self.cols[col].value = False
                         button = self._buttons[row][col]
