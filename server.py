@@ -59,9 +59,6 @@ if __name__ == '__main__':
     logger = logging.getLogger()
 
     app = FastAPI()
+    app.include_router(router)
 
-    uvicorn.run(
-        app,
-        port=1602,
-        reload=True
-    )
+    uvicorn.run(app, port=1602)
