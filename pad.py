@@ -34,7 +34,7 @@ class Keypad:
             [Pin(p) for p in pins['rows']],
             [Pin(p) for p in pins['cols']]
         )
-        self.buttons = [SyntheticButton(self.labels[b]) for b in self.labels]
+        self.buttons = [SyntheticButton(b) for b in self.labels]
 
     def run(self):
         event_loop = asyncio.get_event_loop()
