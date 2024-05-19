@@ -51,7 +51,7 @@ class Keypad:
         event_loop = asyncio.get_event_loop()
 
         async def f():
-            wait = 1 / 800
+            wait = 1 / 80
             cols = enumerate(self.cols)
             rows = enumerate(self.rows)
             while True:
@@ -62,7 +62,7 @@ class Keypad:
                         row.update()
                         new = row.value
                         button = self._buttons[row_i][col_i]
-                        print(f'{button.value=} {button.label=} {new=}')
+                        print(f'{button.label=} {button.value=} {new=}')
                         if button.value ^ new:
 
                             button.value = new
