@@ -19,6 +19,7 @@ class SyntheticButton:
 
 
 class Keypad:
+    buttons: dict[str, SyntheticButton]
     labels = [
         '1', '2', '3', 'A',
         '4', '5', '6', 'B',
@@ -34,7 +35,8 @@ class Keypad:
             [Pin(p) for p in pins['rows']],
             [Pin(p) for p in pins['cols']]
         )
-        self.buttons = [SyntheticButton(b) for b in self.labels]
+        self._buttons = [SyntheticButton(label) for label in self.labels]
+        self.buttons = {button.label: button for button in self._buttons}
 
     def run(self):
         event_loop = asyncio.get_event_loop()
@@ -43,7 +45,7 @@ class Keypad:
             while True:
                 event = self.matrix.events.get()
                 if event and event.pressed:
-                    self.buttons[event.key_number].press()
+                    self._buttons[event.key_number].press()
                 await asyncio.sleep(.001)
 
         event_loop.create_task(f())
