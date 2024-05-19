@@ -95,4 +95,4 @@ class LCD(Character_LCD_Mono, Messageable):
 
 if __name__ == "__main__":
     lcd = LCD()
-    lcd.msg(sys.argv[1], sys.argv[2] if len(sys.argv) > 2 else None)
+    lcd.msg(Message(*sys.argv[1:3]))
