@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass
-from pprint import pprint
 
 from adafruit_debouncer import Debouncer
 from digitalio import DigitalInOut, Pin
@@ -78,14 +77,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
-    pad = Keypad()
-
-    print('row pins:')
-    for p in pad.rows:
-        pprint([(k, v) for k, v in p.__dict__ if not k.startswith('_')])
-
-    print('col pins:')
-    for p in pad.rows:
-        pprint([(k, v) for k, v in p.__dict__ if not k.startswith('_')])
-
-    pad.run()
+    Keypad().run()
