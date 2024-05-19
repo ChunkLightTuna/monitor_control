@@ -63,8 +63,8 @@ class LCD(Character_LCD_Mono, Messageable):
             db5=DigitalInOut(Pin(pins['D5'])),
             db6=DigitalInOut(Pin(pins['D6'])),
             db7=DigitalInOut(Pin(pins['D7'])),
-            lines=16,
-            rows=2
+            columns=16,
+            lines=2
         )
 
         self.create_char(0, [0, 0, 16, 8, 4, 2, 1, 0])  # backslash
