@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import time
 from dataclasses import dataclass
 
 from adafruit_debouncer import Debouncer
@@ -60,16 +59,12 @@ class Keypad:
                 for row in range(4):
                     for col in r:
                         self.cols[col].value = True
-                        a = time.time_ns()
-                        self.rows[row].update()
-                        b = time.time_ns()
                         await asyncio.sleep(interval)
-                        c = time.time_ns()
+                        self.rows[row].update()
                         new = self.rows[row].value
                         self.cols[col].value = False
                         button = self._buttons[row][col]
                         if button.value ^ new:
-                            # print(f'{button.label}:{int(button.value)}->{int(new)}')
                             button.value = new
                             if new:
                                 button.press()
