@@ -28,4 +28,9 @@ app.state.lcd = lcd
 app.include_router(server.router)
 
 if __name__ == '__main__':
-    uvicorn.run(app, port=1602)
+    uvicorn.run(
+        app,
+        port=1602,
+        workers=1,
+        limit_concurrency=1
+    )

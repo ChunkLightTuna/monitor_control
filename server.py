@@ -56,4 +56,9 @@ if __name__ == '__main__':
 
     app = FastAPI()
     app.state.lcd = Stub()
-    uvicorn.run(app, port=1602)
+    uvicorn.run(
+        app,
+        port=1602,
+        reload=True,
+        debug=True
+    )
