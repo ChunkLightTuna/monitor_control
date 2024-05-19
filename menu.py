@@ -1,27 +1,28 @@
 import logging
 
 from keypad import Keypad
-from lcd import LCD, Message, Align
-from main import kvm
+from kvm import KVM
+from lcd import Message, Align, LCD
 
 
 class Menu:
-    def __init__(self, lcd: LCD, keypad: Keypad):
+    def __init__(self, keypad: Keypad, kvm: KVM, lcd: LCD):
         self.stack = []
         self.title = Message('Main Menu').add_arrows()
-        lcd.msg(self.title)
-        self.lcd = lcd
         self.buttons = keypad.buttons
+        self.kvm = kvm
+        self.lcd = lcd
+        self.lcd.msg(self.title)
 
         for b in self.buttons.values():
-            b.press = lambda: lcd.msg(f"{b.label} unmapped")
-        self.buttons['2'].press = lambda: lcd.msg('lol', align=Align.CENTER)
-        self.buttons['8'].press = lambda: lcd.msg('ggg', align=Align.CENTER)
+            b.press = lambda: self.lcd.msg(f"{b.label} unmapped")
+        self.buttons['2'].press = lambda: self.lcd.msg('lol', align=Align.CENTER)
+        self.buttons['8'].press = lambda: self.lcd.msg('ggg', align=Align.CENTER)
         self.buttons['*'].press = self.pop
         self.buttons['A'].press = lambda: self.audio_mode('A')
         self.buttons['B'].press = lambda: self.brightness_mode('B')
-        self.buttons['C'].press = lambda: kvm.prev()
-        self.buttons['D'].press = lambda: kvm.next()
+        self.buttons['C'].press = lambda: lcd.msg(Message('DISPLAY:', self.kvm.prev(lcd)))
+        self.buttons['D'].press = lambda: lcd.msg(Message('DISPLAY:', self.kvm.next(lcd)))
 
     def set_title(self, m: Message | str):
         if isinstance(m, str):
@@ -34,8 +35,10 @@ class Menu:
         self.push()
         self.set_title("SET VOLUME")
 
-        def set_audio(a):
-            kvm.volume(int(a))
+        def set_audio(a: str):
+            self.lcd.msg(Message('VOLUME:', f'{a}%'))
+            self.kvm.volume(int(a))
+
             self.pop()
 
         self.handle_input(label, set_audio)
@@ -44,8 +47,9 @@ class Menu:
         self.push()
         self.set_title("SET BRIGHTNESS")
 
-        def set_brightness(b):
-            kvm.brightness(int(b))
+        def set_brightness(b: str):
+            self.lcd.msg(Message('BRIGHTNESS:', f'{b}%'))
+            self.kvm.brightness(int(b))
             self.pop()
 
         self.handle_input(label, set_brightness)

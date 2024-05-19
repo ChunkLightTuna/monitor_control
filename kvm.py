@@ -3,8 +3,6 @@ import subprocess
 from dataclasses import dataclass
 from signal import pause
 
-from lcd import LCD
-
 
 @dataclass
 class Display:
@@ -13,7 +11,7 @@ class Display:
 
 
 class KVM:
-    def __init__(self, lcd: LCD):
+    def __init__(self):
         with open('pinout.json') as f:
             pinout = json.load(f)
 
@@ -42,28 +40,29 @@ class KVM:
         ).stdout.decode("utf-8").strip().split(" ")[-1]
 
         self.cur = next((idx for idx, d in enumerate(self.displays) if d.id == current_id), 0)
-        self.lcd = lcd
+        # self.lcd = lcd
 
-    def next(self):
+    def next(self) -> str:
         self.cur = (self.cur + 1) % len(self.displays)
-        self.switch(self.displays[self.cur])
+        return self.switch(self.displays[self.cur])
 
-    def prev(self):
+    def prev(self) -> str:
         self.cur = (self.cur - 1) % len(self.displays)
-        self.switch(self.displays[self.cur])
+        return self.switch(self.displays[self.cur])
 
-    def switch(self, display: Display):
-        self.lcd.msg('DISPLAY:', display.label)
+    @staticmethod
+    def switch(display: Display) -> str:
         subprocess.run(["ddcutil", "setvcp", "0x60", display.id])
+        return display.label
 
-    def brightness(self, b: int):
+    @staticmethod
+    def brightness(b: int):
         b = str(max(min(b, 100), 0))
-        self.lcd.msg('BRIGHTNESS:', f'{b}%')
         subprocess.run(["ddcutil", "setvcp", "0x10", b])
 
-    def volume(self, v: int):
+    @staticmethod
+    def volume(v: int):
         v = str(max(min(v, 100), 0))
-        self.lcd.msg('VOLUME:', f'{v}%')
         subprocess.run(["ddcutil", "setvcp", "0x62", v])
 
 

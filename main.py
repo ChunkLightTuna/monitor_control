@@ -12,6 +12,6 @@ logger = logging.getLogger()
 
 keypad = Keypad()
 lcd = LCD()
-kvm = KVM(lcd)
-ui = Menu(lcd, keypad)
+ui = Menu(keypad, KVM(), LCD())
+
 asyncio.gather(keypad.run(), server.run(lcd))

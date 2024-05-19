@@ -67,11 +67,11 @@ class LCD(Character_LCD_Mono, Messageable):
             rows=2
         )
 
-        self.create_char(0, [0, 0, 16, 8, 4, 2, 1, 0])
-        self.create_char(1, [0, 2, 6, 14, 6, 2, 0, 0])
-        self.create_char(2, [0, 0, 4, 14, 31, 0, 0, 0])
-        self.create_char(3, [0, 8, 12, 14, 12, 8, 0, 0])
-        self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])
+        self.create_char(0, [0, 0, 16, 8, 4, 2, 1, 0])  # backslash
+        self.create_char(1, [0, 2, 6, 14, 6, 2, 0, 0])  # arrow left
+        self.create_char(2, [0, 0, 4, 14, 31, 0, 0, 0])  # arrow up
+        self.create_char(3, [0, 8, 12, 14, 12, 8, 0, 0])  # arrow right
+        self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])  # arrow down
         self.clear()
 
     def msg(self, m: Message | str, align: Align = Align.NONE):
