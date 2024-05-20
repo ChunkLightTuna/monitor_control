@@ -12,7 +12,7 @@ from pad import Keypad
 @dataclass
 class Stack:
     key: str
-    title: str
+    msg: Message
     button_labels_to_actions: Dict[str, Callable[[], None]]
 
 
@@ -36,15 +36,15 @@ class Menu:
         self.buttons['D'].press = lambda: lcd.msg(Message('DISPLAY:', self.kvm.next(lcd)))
         self.push()
 
-    def set_title(self, m: Message | str):
-        if isinstance(m, str):
-            m = Message(m)
+    def set_message(self, msg: Message | str):
+        if isinstance(msg, str):
+            msg = Message(msg)
 
-        self.title = m
-        self.lcd.msg(m)
+        self.title = msg
+        self.lcd.msg(msg)
 
     async def tmp_mode(self, msg: Message):
-        self.set_title(msg)
+        self.set_message(msg)
         key = self.push()
         asyncio.sleep(5)
         self.pop(key)
@@ -65,7 +65,7 @@ class Menu:
 
         self.handle_input("SET BRIGHTNESS", button_label, set_brightness)
 
-    def handle_input(self, title: str, button_label: str, fun: callable):
+    def handle_input(self, msg: str, button_label: str, fun: callable):
         queue = []
         for button in self.buttons.values():
             if button.label.isdigit():
@@ -75,7 +75,7 @@ class Menu:
                 button.press = lambda: fun(''.join(queue))
 
         self.buttons[button_label].press = self.pop
-        self.set_title(title)
+        self.set_message(msg)
         self.push()
 
     def push(self):
@@ -84,7 +84,7 @@ class Menu:
 
         self.stack.append(Stack(
             key=key,
-            title=self.title,
+            msg=self.title,
             button_labels_to_actions={button.label: button.press for button in self.buttons.values()}
         ))
         return key
@@ -104,4 +104,4 @@ class Menu:
         state = self.stack[-1]
         for (label, when_pressed) in state.button_labels_to_actions.items():
             self.buttons[label].press = when_pressed
-        self.set_title(state.title)
+        self.set_message(state.msg)
