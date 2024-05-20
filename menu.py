@@ -80,7 +80,7 @@ class Menu:
 
     def push(self):
         key = uuid.uuid4().hex
-        logging.debug(f'Push {key=} {self.title=}')
+        logging.warning(f'Push {key=} {self.title=}')
 
         self.stack.append(Stack(
             key=key,
@@ -90,9 +90,9 @@ class Menu:
         return key
 
     def pop(self, key: str = None):
-        logging.debug(f'Pop {key=} {self.title=}')
+        logging.warning(f'Pop {key=} {self.title=}')
 
-        if self.stack > 1:
+        if len(self.stack) > 1:
             if key:
                 idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
                 if idx:
