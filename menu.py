@@ -23,7 +23,7 @@ class Menu:
         self.lcd = LCD()
 
         for b in self.buttons.values():
-            b.press = lambda: self.lcd.msg(f"{b.label} unmapped")
+            b.press = lambda msg=f"{b.label} unmapped": self.msg_ephemeral(msg)  # closure
         self.buttons['2'].press = lambda: self.lcd.msg(Msg('lol', align_one=Align.CENTER))
         self.buttons['8'].press = lambda: self.lcd.msg(Msg('ggg', align_one=Align.CENTER))
         self.buttons['*'].press = self.pop
