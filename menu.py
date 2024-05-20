@@ -46,7 +46,7 @@ class Menu:
     async def tmp_mode(self, msg: Message):
         self.set_message(msg)
         key = self.push()
-        asyncio.sleep(5)
+        await asyncio.sleep(5)
         self.pop(key)
 
     def audio_mode(self, button_label: str):
