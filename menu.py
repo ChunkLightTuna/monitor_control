@@ -43,18 +43,12 @@ class Menu:
             return self.push(msg)
 
     async def async_msg_ephemeral(self, msg: Msg | str, seconds=5):
-        logging.warning(f'c:{msg=}')
         key = self.msg(msg)
-        logging.warning(f'd:{msg=}')
         await asyncio.sleep(seconds)
-        logging.warning(f'e:{msg=}')
         self.pop(key)
-        logging.warning(f'f:{msg=}')
 
     def msg_ephemeral(self, msg: Msg | str, seconds=5):
-        logging.warning(f'a:{msg=}')
         asyncio.get_event_loop().run_until_complete(self.async_msg_ephemeral(msg, seconds))
-        logging.warning(f'b:{msg=}')
 
     def audio_mode(self, button_label: str):
         def inner(a: int):
@@ -100,7 +94,7 @@ class Menu:
 
     def push(self, msg: Msg):
         key = uuid.uuid4().hex
-
+        logging.warning(f'push {key=}')
         self.stack.append(Stack(
             key=key,
             msg=msg,
@@ -109,6 +103,7 @@ class Menu:
         return key
 
     def pop(self, key: str = None):
+        logging.warning(f'pop {key=}')
         if len(self.stack) > 1:
             if key:
                 idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
