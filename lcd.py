@@ -1,5 +1,4 @@
 import json
-import logging
 import sys
 from dataclasses import dataclass
 from enum import Enum
@@ -23,16 +22,38 @@ class Align(Enum):
 
 
 @dataclass
-class Message:
+class Msg:
     line_one: str
     line_two: str
 
-    def __init__(self, line_one: str, line_two: Optional[str] = None):
+    def __init__(
+            self,
+            line_one: str,
+            line_two: Optional[str] = None,
+            align_one: Align = Align.NONE,
+            align_two: Align = Align.NONE
+    ):
         if not line_two:
             if '\n' in line_one:
-                line_one, line_two = line_one.split('\n')
+                line_one, line_two = line_one.split('\n')[:2]
             else:
                 line_two = ''
+
+        match align_one:
+            case Align.LEFT:
+                line_one = line_one.lstrip()
+            case Align.RIGHT:
+                line_one = f"{line_one:>16}"
+            case Align.CENTER:
+                line_one = line_one.center(16, ' ')
+
+        match align_two:
+            case Align.LEFT:
+                line_two = line_two.lstrip()
+            case Align.RIGHT:
+                line_two = f"{line_two:>16}"
+            case Align.CENTER:
+                line_two = line_two.center(16, ' ')
 
         self.line_one = line_one
         self.line_two = line_two
@@ -46,12 +67,7 @@ class Message:
         return f'{self.line_one}\n{self.line_two}'
 
 
-class Messageable:
-    def msg(self, message: Message, align: Align = Align.NONE):
-        logging.debug(message)
-
-
-class LCD(Character_LCD_Mono, Messageable):
+class LCD(Character_LCD_Mono):
 
     def __init__(self):
         with open('pinout.json') as f:
@@ -78,25 +94,11 @@ class LCD(Character_LCD_Mono, Messageable):
         self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])  # arrow down
         self.clear()
 
-    def msg(self, m: Message | str, align: Align = Align.NONE):
-        if isinstance(m, str):
-            m = Message(m)
-
-        match align:
-            case Align.LEFT:
-                m.line_one = m.line_one.lstrip()
-                m.line_two = m.line_two.lstrip()
-            case Align.RIGHT:
-                m.line_one = f"{m.line_one:>16}"
-                m.line_two = f"{m.line_two:>16}"
-            case Align.CENTER:
-                m.line_one = m.line_one.center(16, ' ')
-                m.line_two = m.line_two.center(16, ' ')
-
+    def msg(self, m: Msg):
         self.clear()
         self.message = f'{m.line_one}\n{m.line_two}'.replace('\\', backslash)
 
 
 if __name__ == "__main__":
     lcd = LCD()
-    lcd.msg(Message(*sys.argv[1:3]))
+    lcd.msg(Msg(*sys.argv[1:3]))

@@ -4,21 +4,20 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import server
-from kvm import KVM
-from lcd import LCD, Message, Align
+from lcd import Msg, Align
 from menu import Menu
 from pad import Keypad
 
 keypad = Keypad()
-lcd = LCD()
-menu = Menu(keypad, KVM(), lcd)
+menu = Menu(keypad)
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await menu.msg_ephemeral(Msg('Monitor', 'Control', align_two=Align.RIGHT))
     keypad_task = asyncio.create_task(keypad.run())
     yield
-    lcd.msg(Message('Shutting', 'Down'), Align.CENTER)
+    menu.msg(Msg('Shutting', 'Down', Align.CENTER, Align.CENTER))
     keypad_task.cancel()
 
 

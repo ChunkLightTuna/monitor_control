@@ -1,98 +1,106 @@
 import asyncio
-import logging
 import uuid
 from dataclasses import dataclass
 from typing import Dict, Callable
 
 from kvm import KVM
-from lcd import Message, Align, LCD
+from lcd import Msg, Align, LCD
 from pad import Keypad
 
 
 @dataclass
 class Stack:
     key: str
-    msg: Message
+    msg: Msg
     button_labels_to_actions: Dict[str, Callable[[], None]]
 
 
 class Menu:
-    def __init__(self, keypad: Keypad, kvm: KVM, lcd: LCD):
+    def __init__(self, keypad: Keypad):
         self.stack: list[Stack] = []
-        self.title = Message('Main Menu').add_arrows()
         self.buttons = keypad.buttons
-        self.kvm = kvm
-        self.lcd = lcd
-        self.lcd.msg(self.title)
+        self.kvm = KVM()
+        self.lcd = LCD()
 
         for b in self.buttons.values():
             b.press = lambda: self.lcd.msg(f"{b.label} unmapped")
-        self.buttons['2'].press = lambda: self.lcd.msg('lol', align=Align.CENTER)
-        self.buttons['8'].press = lambda: self.lcd.msg('ggg', align=Align.CENTER)
+        self.buttons['2'].press = lambda: self.lcd.msg(Msg('lol', align_one=Align.CENTER))
+        self.buttons['8'].press = lambda: self.lcd.msg(Msg('ggg', align_one=Align.CENTER))
         self.buttons['*'].press = self.pop
         self.buttons['A'].press = lambda: self.audio_mode('A')
         self.buttons['B'].press = lambda: self.brightness_mode('B')
-        self.buttons['C'].press = lambda: lcd.msg(Message('DISPLAY:', self.kvm.prev(lcd)))
-        self.buttons['D'].press = lambda: lcd.msg(Message('DISPLAY:', self.kvm.next(lcd)))
-        self.push()
+        self.buttons['C'].press = lambda: self.lcd.msg(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
+        self.buttons['D'].press = lambda: self.lcd.msg(Msg('DISPLAY:', self.kvm.next(self.lcd)))
+        self.msg(Msg('Main Menu').add_arrows())
 
-    def set_message(self, msg: Message | str):
+    def msg(self, msg: Msg | str, push: bool = True) -> str | None:
         if isinstance(msg, str):
-            msg = Message(msg)
+            msg = Msg(msg)
 
-        self.title = msg
         self.lcd.msg(msg)
+        if push:
+            return self.push()
 
-    async def tmp_mode(self, msg: Message):
-        self.set_message(msg)
+    async def msg_ephemeral(self, msg: Msg | str) -> str | None:
+        if isinstance(msg, str):
+            msg = Msg(msg)
+
+        self.lcd.msg(msg)
         key = self.push()
+
         await asyncio.sleep(5)
         self.pop(key)
 
     def audio_mode(self, button_label: str):
-        def set_audio(a: str):
-            self.lcd.msg(Message('VOLUME:', f'{a}%'))
-            self.kvm.volume(int(a))
+        def inner(a: int):
+            self.lcd.msg(Msg('VOLUME:', f'{a}%'))
+            self.kvm.volume(a)
             self.pop()
 
-        self.handle_input("SET VOLUME", button_label, set_audio)
+        self.numerical_input("SET VOLUME", button_label, inner)
 
     def brightness_mode(self, button_label: str):
-        def set_brightness(b: str):
-            self.lcd.msg(Message('BRIGHTNESS:', f'{b}%'))
-            self.kvm.brightness(int(b))
+        def inner(b: int):
+            self.lcd.msg(Msg('BRIGHTNESS:', f'{b}%'))
+            self.kvm.brightness(b)
             self.pop()
 
-        self.handle_input("SET BRIGHTNESS", button_label, set_brightness)
+        self.numerical_input("SET BRIGHTNESS", button_label, inner)
 
-    def handle_input(self, msg: str, button_label: str, fun: callable):
+    def numerical_input(self, msg: str, button_label: str, fun: Callable[[int], None]):
         queue = []
+
+        # since self.msg at the bottom of this function adds to the stack, len() will refer to that element
+        cur_stack = len(self.stack)
+
         for button in self.buttons.values():
             if button.label.isdigit():
                 cur_label = button.label
-                button.press = lambda: queue.append(cur_label)
+
+                def inner():
+                    queue.append(cur_label)
+                    stack_msg = self.stack[cur_stack].msg
+                    stack_msg.line_two = f"{''.join(queue):>16}"
+                    self.msg(stack_msg, push=False)
+
+                button.press = inner
             if button.label == '#':
-                button.press = lambda: fun(''.join(queue))
+                button.press = lambda: fun(int(''.join(queue)))
 
         self.buttons[button_label].press = self.pop
-        self.set_message(msg)
-        self.push()
+        self.msg(msg)
 
-    def push(self):
+    def push(self, msg: Msg):
         key = uuid.uuid4().hex
-        logging.warning(f'Push {key=} {self.title=}')
 
         self.stack.append(Stack(
             key=key,
-            msg=self.title,
+            msg=msg,
             button_labels_to_actions={button.label: button.press for button in self.buttons.values()}
         ))
         return key
 
     def pop(self, key: str = None):
-        logging.info(f'Pop {key=} {self.title=}')
-        print(f'Pop {key=} {self.title=}')
-
         if len(self.stack) > 1:
             if key:
                 idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
@@ -104,4 +112,4 @@ class Menu:
         state = self.stack[-1]
         for (label, when_pressed) in state.button_labels_to_actions.items():
             self.buttons[label].press = when_pressed
-        self.set_message(state.msg)
+        self.lcd.msg(state.msg)
