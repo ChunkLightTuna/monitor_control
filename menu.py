@@ -79,23 +79,26 @@ class Menu:
         self.push()
 
     def push(self):
-        logging.debug("push")
         key = uuid.uuid4().hex
+        logging.debug(f'Push {key=} {self.title=}')
 
         self.stack.append(Stack(
-            key,
-            self.title,
-            {button.label: button.press for button in self.buttons.values()}
+            key=key,
+            title=self.title,
+            button_labels_to_actions={button.label: button.press for button in self.buttons.values()}
         ))
         return key
 
     def pop(self, key: str = None):
-        if key:
-            idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
-            if idx:
-                del self.stack[idx]
-        elif self.stack > 1:
-            self.stack.pop()
+        logging.debug(f'Pop {key=} {self.title=}')
+
+        if self.stack > 1:
+            if key:
+                idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
+                if idx:
+                    del self.stack[idx]
+            else:
+                self.stack.pop()
 
         state = self.stack[-1]
         for (label, when_pressed) in state.button_labels_to_actions.items():
