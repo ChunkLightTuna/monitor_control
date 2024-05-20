@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -16,7 +17,9 @@ ui = Menu(keypad, KVM(), LCD())
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    yield keypad.run()
+    keypad_task = asyncio.create_task(keypad.run())
+    yield
+    keypad_task.cancel()
 
 
 app = FastAPI(lifespan=lifespan)
