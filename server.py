@@ -1,22 +1,13 @@
 import json
 import logging
-from dataclasses import dataclass
 
-import uvicorn
 from fastapi import HTTPException, Request, FastAPI, status, APIRouter
 from fastapi.responses import FileResponse, HTMLResponse, Response
 
-from lcd import Messageable
+from lcd import Message
+from menu import Menu
 
 router = APIRouter()
-
-
-@dataclass
-class State:
-    lcd: Messageable
-
-
-state = State(Messageable())
 
 with open('index.html', 'r') as f:
     index = HTMLResponse(content=f.read())
@@ -45,7 +36,13 @@ async def post(request: Request):
         elif len(line_one) > 16 or len(line_two) > 16:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Max 16 char per line")
         else:
-            state.lcd.msg(line_one, line_two)
+            message = Message(line_one, line_two)
+            menu: Menu | None = request.app.extra.get('menu')
+            if menu:
+                await menu.tmp_mode(message)
+            else:
+                logging.info(message)
+
             return Response(status_code=status.HTTP_200_OK)
     except Exception as e:
         if 'not enough values to unpack' in repr(e):
@@ -56,8 +53,10 @@ async def post(request: Request):
 
 
 if __name__ == '__main__':
+    import sys
+    import uvicorn
+
     app = FastAPI()
     app.include_router(router)
-    import sys
     port = int(sys.argv[-1]) if len(sys.argv) > 1 else 8080
     uvicorn.run(app, host='0.0.0.0', port=port)
