@@ -70,9 +70,7 @@ class Menu:
 
         for button in self.buttons.values():
             if button.label.isdigit():
-                cur_label = button.label
-
-                def inner():
+                def inner(cur_label: str = button.label):  # doing this funky to wrap the button label in a closure
                     queue.append(cur_label)
                     stack_msg = self.stack[cur_stack].msg
                     stack_msg.line_two = f"{''.join(queue):>16}"
