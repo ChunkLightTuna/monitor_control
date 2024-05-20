@@ -39,7 +39,7 @@ class Menu:
 
         self.lcd.msg(msg)
         if push:
-            return self.push()
+            return self.push(msg)
 
     async def msg_ephemeral(self, msg: Msg | str) -> str | None:
         if isinstance(msg, str):
