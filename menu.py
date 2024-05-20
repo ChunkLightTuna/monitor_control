@@ -49,11 +49,6 @@ class Menu:
 
     def msg_ephemeral(self, msg: Msg | str, seconds=5):
         asyncio.create_task(self.async_msg_ephemeral(msg, seconds))
-        # asyncio.new_event_loop().run_until_complete(
-        #     asyncio.ensure_future(
-        #         self.async_msg_ephemeral(msg, seconds)
-        #     )
-        # )
 
     def audio_mode(self, button_label: str):
         def inner(a: int):

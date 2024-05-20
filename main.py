@@ -23,12 +23,3 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(lifespan=lifespan, menu=menu)
 app.include_router(server.router)
-
-if __name__ == '__main__':
-    import uvicorn
-
-    uvicorn.run(
-        app,
-        host='0.0.0.0',
-        port=1602
-    )
