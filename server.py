@@ -39,7 +39,7 @@ async def post(request: Request):
             message = Msg(line_one, line_two)
             menu: Menu | None = request.app.extra.get('menu')
             if menu:
-                await menu.msg_ephemeral(message)
+                await menu.async_msg_ephemeral(message)
             else:
                 logging.info(message)
 

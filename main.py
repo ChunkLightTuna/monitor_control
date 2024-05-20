@@ -14,7 +14,7 @@ menu = Menu(keypad)
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    await menu.msg_ephemeral(Msg('Monitor', 'Control', align_two=Align.RIGHT))
+    await menu.async_msg_ephemeral(Msg('Monitor', 'Control', align_two=Align.RIGHT))
     keypad_task = asyncio.create_task(keypad.run())
     yield
     menu.msg(Msg('Shutting', 'Down', Align.CENTER, Align.CENTER))

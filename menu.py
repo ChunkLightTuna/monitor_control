@@ -23,7 +23,7 @@ class Menu:
         self.lcd = LCD()
 
         for b in self.buttons.values():
-            b.press = lambda msg=f"{b.label} unmapped": self.msg_ephemeral(msg)  # closure
+            b.press = lambda msg=f"{b.label} unmapped": self.msg_ephemeral(msg, 2)  # closure
         self.buttons['2'].press = lambda: self.lcd.msg(Msg('lol', align_one=Align.CENTER))
         self.buttons['8'].press = lambda: self.lcd.msg(Msg('ggg', align_one=Align.CENTER))
         self.buttons['*'].press = self.pop
@@ -41,10 +41,13 @@ class Menu:
         if push:
             return self.push(msg)
 
-    async def msg_ephemeral(self, msg: Msg | str):
+    async def async_msg_ephemeral(self, msg: Msg | str, seconds=5):
         key = self.msg(msg)
-        await asyncio.sleep(5)
+        await asyncio.sleep(seconds)
         self.pop(key)
+
+    def msg_ephemeral(self, msg: Msg | str, seconds=5):
+        asyncio.get_event_loop().run_until_complete(self.async_msg_ephemeral(msg, seconds))
 
     def audio_mode(self, button_label: str):
         def inner(a: int):
