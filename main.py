@@ -16,7 +16,7 @@ ui = Menu(keypad, KVM(), LCD())
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    keypad.run()
+    await keypad.run()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -25,7 +25,7 @@ app.include_router(server.router)
 
 if __name__ == '__main__':
     uvicorn.run(
-        'main:app',
+        app,
         host='0.0.0.0',
         port=1602,
         workers=1,

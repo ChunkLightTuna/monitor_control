@@ -59,5 +59,5 @@ if __name__ == '__main__':
     app = FastAPI()
     app.include_router(router)
     import sys
-    port = int(sys.argv[-1]) if len(sys.argv) > 1 else 7680
+    port = int(sys.argv[-1]) if len(sys.argv) > 1 else 8080
     uvicorn.run(app, host='0.0.0.0', port=port)
