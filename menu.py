@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import uuid
 from dataclasses import dataclass
 from typing import Dict, Callable
@@ -47,7 +48,8 @@ class Menu:
         self.pop(key)
 
     def msg_ephemeral(self, msg: Msg | str, seconds=5):
-        asyncio.get_event_loop().run_until_complete(self.async_msg_ephemeral(msg, seconds))
+        logging.warning(f'{msg=}')
+        # asyncio.get_event_loop().run_until_complete(self.async_msg_ephemeral(msg, seconds))
 
     def audio_mode(self, button_label: str):
         def inner(a: int):
