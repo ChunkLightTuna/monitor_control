@@ -90,7 +90,8 @@ class Menu:
         return key
 
     def pop(self, key: str = None):
-        logging.warning(f'Pop {key=} {self.title=}')
+        logging.info(f'Pop {key=} {self.title=}')
+        print(f'Pop {key=} {self.title=}')
 
         if len(self.stack) > 1:
             if key:
