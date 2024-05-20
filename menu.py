@@ -43,13 +43,18 @@ class Menu:
             return self.push(msg)
 
     async def async_msg_ephemeral(self, msg: Msg | str, seconds=5):
+        logging.warning(f'c:{msg=}')
         key = self.msg(msg)
+        logging.warning(f'd:{msg=}')
         await asyncio.sleep(seconds)
+        logging.warning(f'e:{msg=}')
         self.pop(key)
+        logging.warning(f'f:{msg=}')
 
     def msg_ephemeral(self, msg: Msg | str, seconds=5):
-        logging.warning(f'{msg=}')
-        # asyncio.get_event_loop().run_until_complete(self.async_msg_ephemeral(msg, seconds))
+        logging.warning(f'a:{msg=}')
+        asyncio.get_event_loop().run_until_complete(self.async_msg_ephemeral(msg, seconds))
+        logging.warning(f'b:{msg=}')
 
     def audio_mode(self, button_label: str):
         def inner(a: int):
