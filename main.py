@@ -5,7 +5,7 @@ from fastapi import FastAPI
 
 import server
 from kvm import KVM
-from lcd import LCD
+from lcd import LCD, Message, Align
 from menu import Menu
 from pad import Keypad
 
@@ -18,6 +18,7 @@ menu = Menu(keypad, KVM(), lcd)
 async def lifespan(_: FastAPI):
     keypad_task = asyncio.create_task(keypad.run())
     yield
+    lcd.msg(Message('Shutting', 'Down'), Align.CENTER)
     keypad_task.cancel()
 
 
