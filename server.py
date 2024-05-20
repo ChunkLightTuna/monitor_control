@@ -60,4 +60,4 @@ if __name__ == '__main__':
     app.include_router(router)
     import sys
     port = int(sys.argv[-1]) if len(sys.argv) > 1 else 7680
-    uvicorn.run(app, port=port)
+    uvicorn.run(app, host='0.0.0.0', port=port)
