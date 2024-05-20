@@ -41,13 +41,8 @@ class Menu:
         if push:
             return self.push(msg)
 
-    async def msg_ephemeral(self, msg: Msg | str) -> str | None:
-        if isinstance(msg, str):
-            msg = Msg(msg)
-
-        self.lcd.msg(msg)
-        key = self.push()
-
+    async def msg_ephemeral(self, msg: Msg | str):
+        key = self.msg(msg)
         await asyncio.sleep(5)
         self.pop(key)
 
