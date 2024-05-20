@@ -17,6 +17,8 @@ ui = Menu(keypad, KVM(), LCD())
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     await keypad.run()
+    yield
+    print('byee')
 
 
 app = FastAPI(lifespan=lifespan)
