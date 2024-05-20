@@ -90,16 +90,14 @@ class Menu:
         return key
 
     def pop(self, key: str = None):
-        logging.debug("pop")
-        if self.stack > 1:
-            if key:
-                idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
-                if idx:
-                    del self.stack[idx]
-            else:
-                self.stack.pop()
+        if key:
+            idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
+            if idx:
+                del self.stack[idx]
+        elif self.stack > 1:
+            self.stack.pop()
 
-            state = self.stack[-1]
-            for (label, when_pressed) in state.button_labels_to_actions.items():
-                self.buttons[label].press = when_pressed
-            self.set_title(state.title)
+        state = self.stack[-1]
+        for (label, when_pressed) in state.button_labels_to_actions.items():
+            self.buttons[label].press = when_pressed
+        self.set_title(state.title)
