@@ -62,7 +62,7 @@ class Menu:
 
         self.numerical_input("SET BRIGHTNESS", button_label, inner)
 
-    def numerical_input(self, msg: str, button_label: str, fun: Callable[[int], None]):
+    def numerical_input(self, msg: str, button_label: str, fun: Callable[[int], None], percent=True):
         queue = []
 
         # since self.msg at the bottom of this function adds to the stack, len() will refer to that element
@@ -70,11 +70,16 @@ class Menu:
 
         for button in self.buttons.values():
             if button.label.isdigit():
-                def inner(cur_label: str = button.label):  # doing this funky to wrap the button label in a closure
+                def inner(cur_label=button.label):  # default arg is required to wrap the button label in a closure
                     queue.append(cur_label)
                     stack_msg = self.stack[cur_stack].msg
-                    stack_msg.line_two = f"{''.join(queue):>16}"
+                    num = ''.join(queue)
+                    if percent:
+                        num = f"{max(int(num), 100)}%"
+                    stack_msg.line_two = f"""{num:>16}"""
                     self.msg(stack_msg, push=False)
+                    if percent and len(num) >= 2 and num != '10':
+                        fun(int(num))
 
                 button.press = inner
             if button.label == '#':
