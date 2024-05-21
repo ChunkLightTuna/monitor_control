@@ -105,7 +105,7 @@ class Menu:
             async def update_weather():
                 while True:
                     now = datetime.now()
-                    asyncio.sleep(60 - now.timestamp() % 60)
+                    await asyncio.sleep(60 - now.timestamp() % 60)
                     if self.cur == weather_index:
                         if now.minute % 30:
                             current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
