@@ -4,7 +4,6 @@ import os
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
-from time import time
 from typing import Dict, Callable
 
 import httpx
@@ -73,23 +72,25 @@ class Menu:
                 res = httpx.get(url)
                 if res.is_success:
                     w = res.json()
-                    description = w['weather'][0]['main']
-                    temp = f"{round(w['main']['temp'])}{FAHRENHEIT}"
+                    now = datetime.now()
+
+                    time = now.strftime('%I:%M%p').lstrip('0')
+                    conditions = f"{round(w['main']['temp'])}{FAHRENHEIT} {w['weather'][0]['main']}"
                     wind = f"{round(w['wind']['speed'])}mph {wind_dir(w['wind']['deg'])}"
 
                     sun_ts = w['sys']['sunrise']
-                    if time() > sun_ts:
+                    if now.timestamp() > sun_ts:
                         sun_ts = w['sys']['sunset']
                         sun_symbol = MOON
                     else:
                         sun_symbol = SUN
                     sun_time = datetime.fromtimestamp(sun_ts)
-                    sun = f'{sun_symbol}{sun_time.hour}:{sun_time.minute}'
+                    sun = f"{sun_symbol}{sun_time.strftime('%I:%M%p').lstrip('0')}"
 
-                    padding_1 = 16 - len(description)
+                    padding_1 = 16 - len(conditions)
                     padding_2 = 16 - len(sun)
                     msg = Msg(
-                        f'{temp.ljust(padding_1)}{description}',
+                        f'{time.ljust(padding_1)}{conditions}',
                         f'{wind.ljust(padding_2)}{sun}'
                     )
                 else:
