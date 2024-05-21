@@ -5,23 +5,33 @@ the screen from api requests.
 
 <img src="img/enclosure_render.png" alt="drawing" height="360"/><img src="img/webui.jpg" alt="drawing" height="360"/>
 
-## Parts List
+## Hardware
 
+### Parts List
+
+- [3D Printed Enclosure](hardware/enclosure.3mf)
 - Raspberry Pi Zero W
-- 1602 16x2 HD44780
-- 4x4 Matrix Keypad
+- [16x2 HD44780 LCD Display](https://www.adafruit.com/product/181)
+- [4x4 Matrix Keypad](https://www.adafruit.com/product/3844)
 - 10K Trimpot
 - Female/Female Jumper Wires
-- Micro USB Cable
+- Micro USB Cable for power
 - Mini HDMI Cable
+- 4x M3x12 bolts
+- 4x 10mm self adhesive rubber feet
 
-## Wiring
+### Assembly
 
-See Adafruit's guides to wiring
-the [display](https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/wiring) and
-[keypad](https://learn.adafruit.com/matrix-keypad/python-circuitpython#python-computer-wiring-2998508).
+See Adafruit's guides to wiring the
+[display](https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/wiring)
+and
+[keypad](https://learn.adafruit.com/matrix-keypad/python-circuitpython#python-computer-wiring-2998508).\
+The pins on the lcd and display must be bent ~45° in order for them to fit inside the case.\
+The protrusions in the 3d model sized for a ~18mm cylinder are to hold a chunk of steel to give it some extra weight.
 
-## Prerequisites
+## Software
+
+### Prerequisites
 
 Controlling the monitor relies on the DDC/CI protocol.
 This is done over the `/dev/i2c-2` interface which is disabled by default.
@@ -48,7 +58,7 @@ Monitor IDs to be used under `displays` can be retrieved using the following `dd
 ddcutil capabilities | awk '/Feature: 60 \(Input Source\)/{p=1} /^ Feature: 62/{p=0} p'
 ```
 
-## Installation
+### Installation
 
 ```bash
 git clone https://github.com/ChunkLightTuna/monitor_control.git
