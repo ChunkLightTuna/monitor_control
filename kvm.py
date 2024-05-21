@@ -40,14 +40,13 @@ class KVM:
         ).stdout.decode("utf-8").strip().split(" ")[-1]
 
         self.cur = next((idx for idx, d in enumerate(self.displays) if d.id == current_id), 0)
-        # self.lcd = lcd
-
-    def next(self) -> str:
-        self.cur = (self.cur + 1) % len(self.displays)
-        return self.switch(self.displays[self.cur])
 
     def prev(self) -> str:
         self.cur = (self.cur - 1) % len(self.displays)
+        return self.switch(self.displays[self.cur])
+
+    def next(self) -> str:
+        self.cur = (self.cur + 1) % len(self.displays)
         return self.switch(self.displays[self.cur])
 
     @staticmethod
