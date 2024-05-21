@@ -79,11 +79,9 @@ class Menu:
                     stack_msg = self.stack[cur_stack].msg
                     num = ''.join(queue)
                     if percent:
-                        num = f"{max(int(num), 100)}%"
+                        num = f"{min(int(num), 100)}%"
                     stack_msg.line_two = f"""{num:>16}"""
                     self.msg(stack_msg, push=False)
-                    if percent and len(num) >= 2 and num != '10':
-                        fun(int(num))
 
                 button.press = inner
             if button.label == '#':
@@ -94,7 +92,7 @@ class Menu:
 
     def push(self, msg: Msg):
         key = uuid.uuid4().hex
-        logging.warning(f'push {key=}')
+        logging.info(f'push {key=}')
         self.stack.append(Stack(
             key=key,
             msg=msg,
@@ -103,7 +101,7 @@ class Menu:
         return key
 
     def pop(self, key: str = None):
-        logging.warning(f'pop {key=}')
+        logging.info(f'pop {key=}')
         if len(self.stack) > 1:
             if key:
                 idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
