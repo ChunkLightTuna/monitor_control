@@ -13,6 +13,8 @@ UP_ARROW = '\x02'
 RIGHT_ARROW = '\x03'
 DOWN_ARROW = '\x04'
 FAHRENHEIT = '\x05'
+MOON = '\x06'
+SUN = '\x07'
 
 
 class Align(Enum):
@@ -44,7 +46,7 @@ class Msg:
             case Align.LEFT:
                 line_one = line_one.lstrip()
             case Align.RIGHT:
-                line_one = f"{line_one:>16}"
+                line_one = line_one.rjust(16)
             case Align.CENTER:
                 line_one = line_one.center(16, ' ')
 
@@ -52,7 +54,7 @@ class Msg:
             case Align.LEFT:
                 line_two = line_two.lstrip()
             case Align.RIGHT:
-                line_two = f"{line_two:>16}"
+                line_two = line_two.rjust(16)
             case Align.CENTER:
                 line_two = line_two.center(16, ' ')
 
@@ -94,6 +96,8 @@ class LCD(Character_LCD_Mono):
         self.create_char(3, [0, 8, 12, 14, 12, 8, 0, 0])  # arrow right
         self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])  # arrow down
         self.create_char(5, [24, 24, 7, 4, 7, 4, 4, 0])  # fahrenheit
+        self.create_char(6, [0, 14, 31, 31, 31, 14, 0, 0])  # moon
+        self.create_char(7, [0, 14, 17, 17, 17, 14, 0, 0])  # sun
         self.clear()
 
     def msg(self, m: Msg):

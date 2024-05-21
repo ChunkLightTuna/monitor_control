@@ -1,15 +1,16 @@
 import asyncio
 import logging
 import os
-import time
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
+from time import time
 from typing import Dict, Callable
 
 import httpx
 
 from kvm import KVM
-from lcd import Msg, Align, LCD, FAHRENHEIT
+from lcd import Msg, Align, LCD, FAHRENHEIT, SUN, MOON
 from pad import Keypad
 
 
@@ -73,14 +74,23 @@ class Menu:
                 if res.is_success:
                     w = res.json()
                     description = w['weather'][0]['main']
-                    temp = round(w['main']['temp'])
-                    wind_speed = round(w['wind']['speed'])
-                    wind_direction = wind_dir(w['wind']['deg'])
-                    sun = 'sunrise' if w['sys']['sunrise'] > time.time() else 'sunset'
+                    temp = f"{round(w['main']['temp'])}{FAHRENHEIT}"
+                    wind = f"{round(w['wind']['speed'])}mph {wind_dir(w['wind']['deg'])}"
 
+                    sun_ts = w['sys']['sunrise']
+                    if time() > sun_ts:
+                        sun_ts = w['sys']['sunset']
+                        sun_symbol = MOON
+                    else:
+                        sun_symbol = SUN
+                    sun_time = datetime.fromtimestamp(sun_ts)
+                    sun = f'{sun_symbol}{sun_time.hour}:{sun_time.minute}'
+
+                    padding_1 = 16 - len(description)
+                    padding_2 = 16 - len(sun)
                     msg = Msg(
-                        f'{temp}{FAHRENHEIT} {description}',
-                        f'{wind_speed}mph {wind_direction} {w["sys"][sun]}'
+                        f'{temp.ljust(padding_1)}{description}',
+                        f'{wind.ljust(padding_2)}{sun}'
                     )
                 else:
                     msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
