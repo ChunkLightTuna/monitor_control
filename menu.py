@@ -42,13 +42,13 @@ class Menu:
         if push:
             return self.push(msg)
 
-    async def async_msg_ephemeral(self, msg: Msg | str, seconds=5):
-        key = self.msg(msg)
-        await asyncio.sleep(seconds)
-        self.pop(key)
-
     def msg_ephemeral(self, msg: Msg | str, seconds=5):
-        asyncio.create_task(self.async_msg_ephemeral(msg, seconds))
+        async def inner(m, s):
+            key = self.msg(m)
+            await asyncio.sleep(s)
+            self.pop(key)
+
+        asyncio.create_task(inner(msg, seconds))
 
     def audio_mode(self, button_label: str):
         def inner(a: int):
