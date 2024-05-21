@@ -109,6 +109,8 @@ class Menu:
                 idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
                 if idx:
                     del self.stack[idx]
+                    if idx != len(self.stack):
+                        return  # don't need to refresh UI if pulling from middle of stack
             else:
                 self.stack.pop()
 
