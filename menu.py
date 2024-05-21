@@ -114,7 +114,8 @@ class Menu:
                         else:
                             weather()
 
-            asyncio.new_event_loop().run_until_complete(update_weather())
+            asyncio.create_task(update_weather())
+            # asyncio.get_event_loop().run_until_complete(update_weather())
 
     def msg(self, msg: Msg | str, push: bool = True) -> str | None:
         if isinstance(msg, str):
