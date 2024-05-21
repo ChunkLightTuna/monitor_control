@@ -45,13 +45,13 @@ class Menu:
             self.buttons['8'].press = next_menu
             self.buttons['*'].press = self.pop
 
-        def main_menu():
+        def main_menu(init=False):
             base()
             self.buttons['A'].press = lambda: self.numerical_input('SET VOLUME', self.kvm.volume)
             self.buttons['B'].press = lambda: self.numerical_input("SET BRIGHTNESS", self.kvm.brightness)
             self.buttons['C'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
             self.buttons['D'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.next(self.lcd)))
-            self.msg(Msg('Main Menu').add_arrows())
+            self.msg(Msg('Main Menu').add_arrows(), push=init)
 
         self.submenus.append(main_menu)
 
@@ -88,6 +88,8 @@ class Menu:
                 self.msg(msg)
 
             self.submenus.append(weather)
+
+            main_menu(init=True)
 
     def msg(self, msg: Msg | str, push: bool = True) -> str | None:
         if isinstance(msg, str):
