@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import uuid
 from dataclasses import dataclass
 from typing import Dict, Callable
@@ -22,6 +23,8 @@ class Menu:
         self.buttons = keypad.buttons
         self.kvm = KVM()
         self.lcd = LCD()
+        self.weather_key = os.environ.get('OPEN_WEATHER_API_KEY')
+        logging.warning(self.weather_key)
 
         for b in self.buttons.values():
             b.press = lambda msg=f"{b.label} unmapped": self.msg_ephemeral(msg, .5)  # for closure label is on left
