@@ -57,7 +57,7 @@ python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 sed -e "s/\${DIR}/$(pwd | sed 's|/|\\\/|g')/g" monitor_control.sample.service > monitor_control.service
-systemctl --user enable --now "$(pwd)/monitor_control.service"
+systemctl enable --now "$(pwd)/monitor_control.service"
 ```
 
 By default the webserver runs on port 1602. This can be changed in `monitor_control.service`.
