@@ -93,7 +93,7 @@ class LCD(Character_LCD_Mono):
         self.create_char(2, [0, 0, 4, 14, 31, 0, 0, 0])  # arrow up
         self.create_char(3, [0, 8, 12, 14, 12, 8, 0, 0])  # arrow right
         self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])  # arrow down
-        self.create_char(5, [24, 24, 7, 4, 7, 4, 4])  # fahrenheit
+        self.create_char(5, [24, 24, 7, 4, 7, 4, 4, 0])  # fahrenheit
         self.clear()
 
     def msg(self, m: Msg):
