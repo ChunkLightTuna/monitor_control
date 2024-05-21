@@ -38,16 +38,21 @@
 <form id="form" autocomplete="off">
     <input type="text" class="text" id="line_one" maxlength="16" placeholder="Two Lines">
     <input type="text" class="text" id="line_two" maxlength="16" placeholder="16 Chars Each">
-    <input type="submit" class="submit" value="Send">
+    <input type="submit" class="submit" id="submit" value="Send">
 </form>
 <script>
-    document.getElementById('form').onsubmit = function () {
-        let line_one = document.getElementById('line_one').value
-        let line_two = document.getElementById('line_two').value
+    const line_one = document.getElementById('line_one')
+    const line_two = document.getElementById('line_two')
+    const submit = document.getElementById('submit')
+
+    document.getElementById('form').onsubmit = () => {
         fetch("/", {
             method: "POST",
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify([line_one, line_two])
+            body: JSON.stringify([line_one.value, line_two.value])
+        }).then(response => {
+            submit.value = response.ok ? '✅' : '❌'
+            setTimeout(() => submit.value = 'Send', 500)
         });
         return false;
     }
