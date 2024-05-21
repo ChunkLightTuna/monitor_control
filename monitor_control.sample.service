@@ -4,6 +4,8 @@ Description=Toggle Monitor Input from Keypad
 
 [Service]
 Environment="OPEN_WEATHER_API_KEY="
+Environment="LAT="
+Environment="LON="
 WorkingDirectory=${DIR}
 ExecStart=${DIR}/venv/bin/python -m uvicorn main:app \
     --host 0.0.0.0 \

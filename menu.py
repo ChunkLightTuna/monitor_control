@@ -1,12 +1,15 @@
 import asyncio
 import logging
 import os
+import time
 import uuid
 from dataclasses import dataclass
 from typing import Dict, Callable
 
+import httpx
+
 from kvm import KVM
-from lcd import Msg, Align, LCD
+from lcd import Msg, Align, LCD, FAHRENHEIT
 from pad import Keypad
 
 
@@ -23,19 +26,68 @@ class Menu:
         self.buttons = keypad.buttons
         self.kvm = KVM()
         self.lcd = LCD()
-        self.weather_key = os.environ.get('OPEN_WEATHER_API_KEY')
-        logging.warning(self.weather_key)
 
-        for b in self.buttons.values():
-            b.press = lambda msg=f"{b.label} unmapped": self.msg_ephemeral(msg, .5)  # for closure label is on left
-        self.buttons['2'].press = lambda: self.lcd.msg(Msg('lol', align_one=Align.CENTER))
-        self.buttons['8'].press = lambda: self.lcd.msg(Msg('ggg', align_one=Align.CENTER))
-        self.buttons['*'].press = self.pop
-        self.buttons['A'].press = lambda: self.numerical_input('SET VOLUME', self.kvm.volume)
-        self.buttons['B'].press = lambda: self.numerical_input("SET BRIGHTNESS", self.kvm.brightness)
-        self.buttons['C'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
-        self.buttons['D'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.next(self.lcd)))
-        self.msg(Msg('Main Menu').add_arrows())
+        self.cur = 0
+        self.submenus = []
+
+        def prev_menu():
+            self.cur = (self.cur - 1) % len(self.submenus)
+            self.submenus[self.cur]()
+
+        def next_menu():
+            self.cur = (self.cur + 1) % len(self.submenus)
+            self.submenus[self.cur]()
+
+        def base():
+            for b in self.buttons.values():
+                b.press = lambda msg=f"{b.label} unmapped": self.msg_ephemeral(msg, .5)  # for closure label is on left
+            self.buttons['2'].press = prev_menu
+            self.buttons['8'].press = next_menu
+            self.buttons['*'].press = self.pop
+
+        def main_menu():
+            base()
+            self.buttons['A'].press = lambda: self.numerical_input('SET VOLUME', self.kvm.volume)
+            self.buttons['B'].press = lambda: self.numerical_input("SET BRIGHTNESS", self.kvm.brightness)
+            self.buttons['C'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
+            self.buttons['D'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.next(self.lcd)))
+            self.msg(Msg('Main Menu').add_arrows())
+
+        self.submenus.append(main_menu)
+
+        weather_key = os.environ.get('OPEN_WEATHER_API_KEY')
+        if weather_key:
+            lat = os.environ.get('LAT')
+            lon = os.environ.get('LON')
+            url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={weather_key}&units=imperial"
+            directions = [
+                'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'
+            ]
+
+            def wind_dir(degrees: int):
+                return next(d for i, d in enumerate(directions) if i * 22.5 >= degrees - 11.25)
+
+            def weather():
+                base()
+                res = httpx.get(url)
+                if res.is_success:
+                    w = res.json()
+                    description = w['weather'][0]['main']
+                    temp = round(w['main']['temp'])
+                    wind_speed = round(w['wind']['speed'])
+                    wind_direction = wind_dir(w['wind']['deg'])
+                    sun = 'sunrise' if w['sys']['sunrise'] > time.time() else 'sunset'
+
+                    msg = Msg(
+                        f'{temp}{FAHRENHEIT} {description}',
+                        f'{wind_speed}mph {wind_direction} {w["sys"][sun]}'
+                    )
+                else:
+                    msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
+
+                self.msg(msg)
+
+            self.submenus.append(weather)
 
     def msg(self, msg: Msg | str, push: bool = True) -> str | None:
         if isinstance(msg, str):

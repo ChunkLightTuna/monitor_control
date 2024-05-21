@@ -7,11 +7,12 @@ from typing import Optional
 from adafruit_character_lcd.character_lcd import Character_LCD_Mono
 from digitalio import DigitalInOut, Pin
 
-backslash = '\x00'
-left_arrow = '\x01'
-up_arrow = '\x02'
-right_arrow = '\x03'
-down_arrow = '\x04'
+BACKSLASH = '\x00'
+LEFT_ARROW = '\x01'
+UP_ARROW = '\x02'
+RIGHT_ARROW = '\x03'
+DOWN_ARROW = '\x04'
+FAHRENHEIT = '\x05'
 
 
 class Align(Enum):
@@ -59,8 +60,8 @@ class Msg:
         self.line_two = line_two
 
     def add_arrows(self):
-        self.line_one = f"{self.line_one:<16}"[:14] + '2' + up_arrow
-        self.line_two = f"{self.line_two:<16}"[:14] + '8' + down_arrow
+        self.line_one = f"{self.line_one:<16}"[:14] + '2' + UP_ARROW
+        self.line_two = f"{self.line_two:<16}"[:14] + '8' + DOWN_ARROW
         return self
 
     def __repr__(self):
@@ -92,11 +93,12 @@ class LCD(Character_LCD_Mono):
         self.create_char(2, [0, 0, 4, 14, 31, 0, 0, 0])  # arrow up
         self.create_char(3, [0, 8, 12, 14, 12, 8, 0, 0])  # arrow right
         self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])  # arrow down
+        self.create_char(5, [24, 24, 7, 4, 7, 4, 4])  # fahrenheit
         self.clear()
 
     def msg(self, m: Msg):
         self.clear()
-        self.message = f'{m.line_one}\n{m.line_two}'.replace('\\', backslash)
+        self.message = f'{m.line_one}\n{m.line_two}'.replace('\\', BACKSLASH)
 
 
 if __name__ == "__main__":
