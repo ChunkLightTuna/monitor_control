@@ -79,7 +79,7 @@ class Menu:
                     now = datetime.now()
 
                     current_time = now.strftime('%I:%M%p').lstrip('0')
-                    conditions = f"{round(w['main']['temp'])}{FAHRENHEIT} {w['weather'][0]['main']}"
+                    conditions = f"{round(w['main']['temp'])}{FAHRENHEIT}{w['weather'][0]['main']}"[:10]
                     wind = f"{round(w['wind']['speed'])}mph {wind_dir(w['wind']['deg'])}"
 
                     sun_ts = w['sys']['sunrise']
@@ -112,7 +112,7 @@ class Menu:
                     await asyncio.sleep(60 - time.time() % 60)
                     now = datetime.now()
                     if self.cur == weather_index:
-                        if now.minute % 30:
+                        if now.minute % 15:
                             current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
                             self.stack[0].msg.line_one = f'{current_time}{self.stack[0].msg.line_one[7:]}'
                             self.lcd.msg(self.stack[0].msg)
