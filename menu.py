@@ -28,10 +28,10 @@ class Menu:
         self.buttons['2'].press = lambda: self.lcd.msg(Msg('lol', align_one=Align.CENTER))
         self.buttons['8'].press = lambda: self.lcd.msg(Msg('ggg', align_one=Align.CENTER))
         self.buttons['*'].press = self.pop
-        self.buttons['A'].press = lambda: self.audio_mode('A')
-        self.buttons['B'].press = lambda: self.brightness_mode('B')
-        self.buttons['C'].press = lambda: self.lcd.msg(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
-        self.buttons['D'].press = lambda: self.lcd.msg(Msg('DISPLAY:', self.kvm.next(self.lcd)))
+        self.buttons['A'].press = lambda: self.numerical_input('SET VOLUME', self.kvm.volume)
+        self.buttons['B'].press = lambda: self.numerical_input("SET BRIGHTNESS", self.kvm.brightness)
+        self.buttons['C'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
+        self.buttons['D'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.next(self.lcd)))
         self.msg(Msg('Main Menu').add_arrows())
 
     def msg(self, msg: Msg | str, push: bool = True) -> str | None:
@@ -50,23 +50,7 @@ class Menu:
 
         asyncio.create_task(inner(msg, seconds))
 
-    def audio_mode(self, button_label: str):
-        def inner(a: int):
-            self.lcd.msg(Msg('VOLUME:', f'{a}%'))
-            self.kvm.volume(a)
-            self.pop()
-
-        self.numerical_input("SET VOLUME", button_label, inner)
-
-    def brightness_mode(self, button_label: str):
-        def inner(b: int):
-            self.lcd.msg(Msg('BRIGHTNESS:', f'{b}%'))
-            self.kvm.brightness(b)
-            self.pop()
-
-        self.numerical_input("SET BRIGHTNESS", button_label, inner)
-
-    def numerical_input(self, msg: str, button_label: str, fun: Callable[[int], None], percent=True):
+    def numerical_input(self, msg: str, fun: Callable[[int], None], percent=True):
         queue = []
 
         # since self.msg at the bottom of this function adds to the stack, len() will refer to that element
@@ -85,9 +69,12 @@ class Menu:
 
                 button.press = inner
             if button.label == '#':
-                button.press = lambda: fun(int(''.join(queue)))
+                def commit():
+                    fun(int(''.join(queue)))
+                    self.pop()
 
-        self.buttons[button_label].press = self.pop
+                button.press = commit
+
         self.msg(msg)
 
     def push(self, msg: Msg):
