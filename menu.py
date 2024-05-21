@@ -74,7 +74,7 @@ class Menu:
                     w = res.json()
                     now = datetime.now()
 
-                    time = now.strftime('%I:%M%p').lstrip('0')
+                    current_time = now.strftime('%I:%M%p').lstrip('0')
                     conditions = f"{round(w['main']['temp'])}{FAHRENHEIT} {w['weather'][0]['main']}"
                     wind = f"{round(w['wind']['speed'])}mph {wind_dir(w['wind']['deg'])}"
 
@@ -90,17 +90,31 @@ class Menu:
                     padding_1 = 16 - len(conditions)
                     padding_2 = 16 - len(sun)
                     msg = Msg(
-                        f'{time.ljust(padding_1)}{conditions}',
+                        f'{current_time.ljust(padding_1)}{conditions}',
                         f'{wind.ljust(padding_2)}{sun}'
                     )
                 else:
                     msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
 
-                self.msg(msg)
+                self.lcd.msg(msg)
 
+            weather_index = len(self.submenus)
             self.submenus.append(weather)
-
             main_menu(init=True)
+
+            async def update_weather():
+                while True:
+                    now = datetime.now()
+                    asyncio.sleep(60 - now.timestamp() % 60)
+                    if self.cur == weather_index:
+                        if now.minute % 30:
+                            current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
+                            self.stack[0].msg.line_one = f'{current_time}{self.stack[0].msg.line_one[7:]}'
+                            self.lcd.msg(self.stack[0].msg)
+                        else:
+                            weather()
+
+            asyncio.new_event_loop().run_until_complete(update_weather)
 
     def msg(self, msg: Msg | str, push: bool = True) -> str | None:
         if isinstance(msg, str):
