@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime
@@ -51,7 +52,10 @@ class Menu:
             self.buttons['B'].press = lambda: self.numerical_input("SET BRIGHTNESS", self.kvm.brightness)
             self.buttons['C'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.prev(self.lcd)))
             self.buttons['D'].press = lambda: self.msg_ephemeral(Msg('DISPLAY:', self.kvm.next(self.lcd)))
-            self.msg(Msg('Main Menu').add_arrows(), push=init)
+            msg = Msg('Main Menu').add_arrows()
+            self.msg(msg, push=init)
+            if not init:
+                self.stack[0].msg = msg
 
         self.submenus.append(main_menu)
 
@@ -96,6 +100,7 @@ class Menu:
                 else:
                     msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
 
+                self.stack[0].msg = msg
                 self.lcd.msg(msg)
 
             weather_index = len(self.submenus)
@@ -104,8 +109,8 @@ class Menu:
 
             async def update_weather():
                 while True:
+                    await asyncio.sleep(60 - time.time() % 60)
                     now = datetime.now()
-                    await asyncio.sleep(60 - now.timestamp() % 60)
                     if self.cur == weather_index:
                         if now.minute % 30:
                             current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
@@ -115,7 +120,6 @@ class Menu:
                             weather()
 
             asyncio.create_task(update_weather())
-            # asyncio.get_event_loop().run_until_complete(update_weather())
 
     def msg(self, msg: Msg | str, push: bool = True) -> str | None:
         if isinstance(msg, str):
