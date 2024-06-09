@@ -2,15 +2,23 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass
+from typing import Callable
 
 from digitalio import Pin
 from keypad import KeyMatrix
+
+BUTTON_LABELS = [
+    '1', '2', '3', 'A',
+    '4', '5', '6', 'B',
+    '7', '8', '9', 'C',
+    '*', '0', '#', 'D'
+]
 
 
 @dataclass
 class SyntheticButton:
     label: str
-    press: callable
+    press: Callable[[], None]
     value: bool = False
 
     def __init__(self, label: str):
@@ -20,12 +28,6 @@ class SyntheticButton:
 
 class Keypad:
     buttons: dict[str, SyntheticButton]
-    labels = [
-        '1', '2', '3', 'A',
-        '4', '5', '6', 'B',
-        '7', '8', '9', 'C',
-        '*', '0', '#', 'D'
-    ]
 
     def __init__(self):
         with open('pinout.json') as f:
@@ -35,7 +37,7 @@ class Keypad:
             [Pin(p) for p in pins['rows']],
             [Pin(p) for p in pins['cols']]
         )
-        self._buttons = [SyntheticButton(label) for label in self.labels]
+        self._buttons = [SyntheticButton(label) for label in BUTTON_LABELS]
         self.buttons = {button.label: button for button in self._buttons}
 
     async def run(self):
