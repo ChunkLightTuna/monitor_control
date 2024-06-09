@@ -5,7 +5,7 @@ from fastapi import HTTPException, Request, FastAPI, status, APIRouter
 from fastapi.responses import FileResponse, HTMLResponse, Response
 
 from lcd import Msg
-from menu import Menu
+from main_menu import MainMenu
 
 router = APIRouter()
 
@@ -37,7 +37,7 @@ async def post(request: Request):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Max 16 char per line")
         else:
             message = Msg(line_one, line_two)
-            menu: Menu | None = request.app.extra.get('menu')
+            menu: MainMenu | None = request.app.extra.get('menu')
             if menu:
                 menu.msg_ephemeral(message)
             else:

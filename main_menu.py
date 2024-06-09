@@ -1,32 +1,22 @@
 import asyncio
 import logging
-import uuid
-from dataclasses import dataclass, field
-from typing import Callable, Dict, List
-from uuid import UUID
+from typing import Callable, List
 
+from frame import Frame, MainMenuFrame, Menu
 from kvm import KVM
 from lcd import LCD, Msg
-from pad import Keypad, BUTTON_LABELS, SyntheticButton
+from pad import Keypad, SyntheticButton
 from weather import Weather
 
 
-@dataclass
-class Frame:
-    msg: Msg
-    key: UUID = field(default_factory=uuid.uuid4)
-    button_funs: Dict[str:Callable[[], None]] = field(default_factory=dict)
-    active: bool = False
-
-
-class Menu:
+class MainMenu(Menu):
     def __init__(self, keypad: Keypad):
         self.buttons: dict[str, SyntheticButton] = keypad.buttons
         self.kvm = KVM()
         self.lcd = LCD()
 
         self.cur = 0
-        main_menu = MainMenuFrame(active=True)
+        main_menu = MainMenuFrame(self)
         self.stack: List[Frame] = [main_menu]
         self.weather = Weather()
         self.submenus: List[Frame] = [main_menu, self.weather]
@@ -116,33 +106,3 @@ class Menu:
 
         self.stack[-1].active = True
         self.apply()
-
-
-class MenuFrame(Frame):
-    def __init__(
-            self,
-            menu: Menu,
-            msg: Msg,
-            key: uuid.UUID = None,
-            button_funs: Dict[str, Callable[[], None]] = None,
-    ):
-        super().__init__(msg, key, button_funs, True)
-        for b in BUTTON_LABELS:
-            match b:
-                case '2':
-                    button_funs[b] = menu.prev_menu
-                case '8':
-                    button_funs[b] = menu.next_menu
-                case '*':
-                    button_funs[b] = menu.pop
-                case _:  # for closure label is on left
-                    button_funs[b] = lambda m=f"{b} unmapped": menu.msg_ephemeral(m, .5)
-
-
-class MainMenuFrame(MenuFrame):
-    def __init__(self, menu: Menu):
-        super().__init__(menu, Msg('Main Menu').add_arrows())
-        self.button_funs['A'] = lambda: menu.numerical_input('SET VOLUME', menu.kvm.volume)
-        self.button_funs['B'] = lambda: menu.numerical_input("SET BRIGHTNESS", menu.kvm.brightness)
-        self.button_funs['C'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.prev(menu.lcd)))
-        self.button_funs['D'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.next(menu.lcd)))

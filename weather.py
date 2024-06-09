@@ -5,8 +5,8 @@ from time import time
 
 import httpx
 
-from lcd import FAHRENHEIT, MOON, SUN, Align, Msg, LCD
-from menu import MenuFrame
+from frame import MenuFrame, Menu
+from lcd import FAHRENHEIT, MOON, SUN, Align, Msg
 
 directions = [
     'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'
@@ -17,17 +17,9 @@ def wind_dir(degrees: int) -> str:
     return next(d for i, d in enumerate(directions) if i * 22.5 >= degrees - 11.25)
 
 
-class ActiveFrame(MenuFrame):
-    def __init__(self, lcd: LCD):
-        self.lcd = lcd
-        super().__init__()
-
-    async def run(self):
-        pass
-
-
-class Weather(ActiveFrame):
-    def __init__(self):
+class Weather(MenuFrame):
+    def __init__(self, menu: Menu):
+        self.lcd = menu.lcd
         weather_key = os.environ.get('OPEN_WEATHER_API_KEY')
         lat = os.environ.get('LAT')
         lon = os.environ.get('LON')
@@ -36,7 +28,12 @@ class Weather(ActiveFrame):
         self.current_url = f"{open_weather_url}/weather?{url_params}"
         self.forecast_url = f"{open_weather_url}/forecast?{url_params}"
 
-        super().__init__()
+        msg = Msg(
+            datetime.now().strftime('%I:%M%p').lstrip('0').ljust(7),
+            'Weather Loading', Align.LEFT, Align.RIGHT
+        )
+
+        super().__init__(menu, msg)
 
     def todays_forecast(self):
         fore = httpx.get(self.forecast_url).json()

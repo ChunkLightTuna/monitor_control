@@ -5,11 +5,11 @@ from fastapi import FastAPI
 
 import server
 from lcd import Msg, Align
-from menu import Menu
+from main_menu import MainMenu
 from pad import Keypad
 
 keypad = Keypad()
-menu = Menu(keypad)
+menu = MainMenu(keypad)
 
 
 @asynccontextmanager
