@@ -12,7 +12,7 @@ from pad import BUTTON_LABELS
 class Frame:
     msg: Msg
     key: UUID = field(default_factory=uuid.uuid4)
-    button_funs: Dict[str:Callable[[], None]] = field(default_factory=dict)
+    button_funs: Dict[str, Callable[[], None]] = field(default_factory=dict)
     active: bool = False
 
 
