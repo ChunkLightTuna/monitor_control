@@ -18,7 +18,7 @@ class MainMenu(Menu):
         self.cur = 0
         main_menu = MainMenuFrame(self)
         self.stack: List[Frame] = [main_menu]
-        self.weather = Weather()
+        self.weather = Weather(self)
         self.submenus: List[Frame] = [main_menu, self.weather]
 
         self.apply()
