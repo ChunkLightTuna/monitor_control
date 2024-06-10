@@ -14,6 +14,7 @@ directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW'
 
 
 def wind_dir(degrees: int) -> str:
+    logging.warning(f"{degrees=}")
     return next(d for i, d in enumerate(directions) if abs(degrees - (i * 22.5)) % (360 - 11.25) < 11.25)
 
 
