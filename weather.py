@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from datetime import datetime
 from time import time
@@ -67,14 +68,17 @@ class Weather(MenuFrame):
             self.msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
 
     async def run(self):
-        while True:
-            await asyncio.sleep(60 - time() % 60)
-            now = datetime.now()
-            if self.active:
-                if now.minute % 15:
-                    current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
-                    self.msg.line_one = f'{current_time}{self.msg.line_one[7:]}'
-                else:
-                    self.update()
+        try:
+            while True:
+                await asyncio.sleep(60 - time() % 60)
+                now = datetime.now()
+                if self.active:
+                    if now.minute % 15:
+                        current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
+                        self.msg.line_one = f'{current_time}{self.msg.line_one[7:]}'
+                    else:
+                        self.update()
 
-                self.lcd.msg(self.msg)
+                    self.lcd.msg(self.msg)
+        finally:
+            logging.exception('Weather stopped')

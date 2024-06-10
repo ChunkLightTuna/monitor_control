@@ -24,15 +24,20 @@ class MainMenu(Menu):
         self.apply()
 
     async def run(self):
-        await asyncio.gather(self.weather.run())
+        # await asyncio.gather(self.weather.run())
+        await self.weather.run()
 
     def prev_menu(self):
+        self.submenus[self.cur].active = False
         self.cur = (self.cur - 1) % len(self.submenus)
         self.apply(self.submenus[self.cur])
+        self.submenus[self.cur].active = True
 
     def next_menu(self):
+        self.submenus[self.cur].active = False
         self.cur = (self.cur + 1) % len(self.submenus)
         self.apply(self.submenus[self.cur])
+        self.submenus[self.cur].active = True
 
     def msg(self, msg: Msg | str) -> str:
         if isinstance(msg, str):

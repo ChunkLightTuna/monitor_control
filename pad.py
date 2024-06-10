@@ -41,11 +41,14 @@ class Keypad:
         self.buttons = {button.label: button for button in self._buttons}
 
     async def run(self):
-        while True:
-            event = self.matrix.events.get()
-            if event and event.pressed:
-                self._buttons[event.key_number].press()
-            await asyncio.sleep(.001)
+        try:
+            while True:
+                event = self.matrix.events.get()
+                if event and event.pressed:
+                    self._buttons[event.key_number].press()
+                await asyncio.sleep(.001)
+        finally:
+            logging.exception('Keypad stopped')
 
 
 if __name__ == "__main__":
