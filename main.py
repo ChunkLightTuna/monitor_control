@@ -16,8 +16,8 @@ menu = MainMenu(keypad)
 async def lifespan(_: FastAPI):
     menu.msg_ephemeral(Msg('Monitor', 'Control', align_two=Align.RIGHT))
     tasks = [
-        asyncio.create_task(keypad.run(), 'Keypad'),
-        asyncio.create_task(menu.run(), 'Menu')
+        asyncio.create_task(keypad.run(), name='Keypad'),
+        asyncio.create_task(menu.run(), name='Menu')
     ]
 
     yield
