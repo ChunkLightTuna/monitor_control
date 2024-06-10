@@ -32,11 +32,8 @@ class Weather(MenuFrame):
             datetime.now().strftime('%I:%M%p').lstrip('0').ljust(7),
             'Weather Loading', Align.LEFT, Align.RIGHT
         )
-        logging.warning('weather a')
         asyncio.create_task(self.update_all())
-        logging.warning('weather b')
         super().__init__(menu, msg)
-        logging.warning('weather c')
 
     def activate(self):
         super().activate()
@@ -53,7 +50,7 @@ class Weather(MenuFrame):
             if res.is_success:
                 w = res.json()
                 now = datetime.now()
-                current_time = now.strftime('%I:%M%p').lstrip('0')
+                current_time = now.strftime('%I:%M%p').lstrip('0').rstrip('M')
                 conditions = f"{round(w['main']['temp'])}{FAHRENHEIT}{w['weather'][0]['main']}"[:10]
                 wind = f"{round(w['wind']['speed'])}mph{wind_dir(w['wind']['deg'])}"
 
