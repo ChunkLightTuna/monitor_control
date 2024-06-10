@@ -10,13 +10,11 @@ import httpx
 from frame import MenuFrame, Menu
 from lcd import FAHRENHEIT, MOON, SUN, Align, Msg
 
-directions = [
-    'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'
-]
+directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
 
 
 def wind_dir(degrees: int) -> str:
-    return next(d for i, d in enumerate(directions) if i * 22.5 >= degrees - 11.25)
+    return next(d for i, d in enumerate(directions) if abs(degrees - (i * 22.5)) % (360 - 11.25) < 11.25)
 
 
 class Weather(MenuFrame):
@@ -39,8 +37,6 @@ class Weather(MenuFrame):
         logging.warning('weather b')
         super().__init__(menu, msg)
         logging.warning('weather c')
-
-
 
     def activate(self):
         super().activate()
