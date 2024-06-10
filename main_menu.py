@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Callable, List
 
-from frame import Frame, MainMenuFrame, Menu
+from frame import Frame, MainMenuFrame, Menu, MenuFrame
 from kvm import KVM
 from lcd import LCD, Msg
 from pad import Keypad, SyntheticButton
@@ -17,10 +17,10 @@ class MainMenu(Menu):
 
         self.cur = 0
         main_menu = MainMenuFrame(self)
+        main_menu.activate()
         self.stack: List[Frame] = [main_menu]
         self.weather = Weather(self)
-        self.submenus: List[Frame] = [main_menu, self.weather]
-
+        self.submenus: List[MenuFrame] = [main_menu, self.weather]
         self.apply()
 
     async def run(self):
@@ -28,16 +28,16 @@ class MainMenu(Menu):
         await self.weather.run()
 
     def prev_menu(self):
-        self.submenus[self.cur].active = False
+        self.submenus[self.cur].deactivate()
         self.cur = (self.cur - 1) % len(self.submenus)
         self.apply(self.submenus[self.cur])
-        self.submenus[self.cur].active = True
+        self.submenus[self.cur].activate()
 
     def next_menu(self):
-        self.submenus[self.cur].active = False
+        self.submenus[self.cur].deactivate()
         self.cur = (self.cur + 1) % len(self.submenus)
         self.apply(self.submenus[self.cur])
-        self.submenus[self.cur].active = True
+        self.submenus[self.cur].activate()
 
     def msg(self, msg: Msg | str) -> str:
         if isinstance(msg, str):
@@ -90,8 +90,8 @@ class MainMenu(Menu):
         self.lcd.msg(frame.msg)
 
     def push(self, frame: Frame) -> str:
-        self.stack[-1].active = False
-        frame.active = True
+        self.stack[-1].deactivate()
+        frame.activate()
         self.stack.append(frame)
         return frame.key
 
@@ -101,13 +101,13 @@ class MainMenu(Menu):
             if key:
                 idx = next((i for (i, s) in enumerate(self.stack) if key == s.key), None)
                 if idx:
-                    self.stack[idx].active = False
+                    self.stack[idx].deactivate()
                     del self.stack[idx]
                     if idx != len(self.stack):
                         return  # don't need to refresh UI if pulling from middle of stack
             else:
-                self.stack[-1].active = False
+                self.stack[-1].deactivate()
                 self.stack.pop()
 
-        self.stack[-1].active = True
+        self.stack[-1].activate()
         self.apply()

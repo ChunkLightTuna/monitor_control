@@ -15,6 +15,12 @@ class Frame:
     button_funs: Dict[str, Callable[[], None]] = field(default_factory=dict)
     active: bool = False
 
+    def activate(self):
+        self.active = True
+
+    def deactivate(self):
+        self.active = False
+
 
 class Menu:
     kvm: KVM
@@ -48,7 +54,7 @@ class MenuFrame(Frame):
             menu: Menu,
             msg: Msg
     ):
-        super().__init__(msg=msg, active=True)
+        super().__init__(msg=msg)
         for b in BUTTON_LABELS:
             match b:
                 case '2':

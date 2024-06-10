@@ -33,39 +33,54 @@ class Weather(MenuFrame):
             datetime.now().strftime('%I:%M%p').lstrip('0').ljust(7),
             'Weather Loading', Align.LEFT, Align.RIGHT
         )
+        asyncio.create_task(self.update_all())
 
         super().__init__(menu, msg)
+
+    def activate(self):
+        super().activate()
+        asyncio.create_task(self.update_all())
 
     def todays_forecast(self):
         fore = httpx.get(self.forecast_url).json()
         today = datetime.now().day
         return [f for f in fore['list'] if datetime.fromtimestamp(int(f['dt'])).day == today]
 
-    def update(self):
-        res = httpx.get(self.current_url)
-        if res.is_success:
-            w = res.json()
-            now = datetime.now()
-            current_time = now.strftime('%I:%M%p').lstrip('0')
-            conditions = f"{round(w['main']['temp'])}{FAHRENHEIT}{w['weather'][0]['main']}"[:10]
-            wind = f"{round(w['wind']['speed'])}mph{wind_dir(w['wind']['deg'])}"
+    async def update_all(self):
+        async with httpx.AsyncClient() as client:
+            res = await client.get(self.current_url)
+            if res.is_success:
+                w = res.json()
+                now = datetime.now()
+                current_time = now.strftime('%I:%M%p').lstrip('0')
+                conditions = f"{round(w['main']['temp'])}{FAHRENHEIT}{w['weather'][0]['main']}"[:10]
+                wind = f"{round(w['wind']['speed'])}mph{wind_dir(w['wind']['deg'])}"
 
-            sun_ts, sun_symbol = (
-                w['sys']['sunset'], MOON
-            ) if (w['sys']['sunrise'] < now.timestamp() < w['sys']['sunset']) else (
-                w['sys']['sunrise'], SUN
-            )
+                sun_ts, sun_symbol = (
+                    w['sys']['sunset'], MOON
+                ) if (w['sys']['sunrise'] < now.timestamp() < w['sys']['sunset']) else (
+                    w['sys']['sunrise'], SUN
+                )
 
-            sun_time = datetime.fromtimestamp(sun_ts)
-            sun = f"{sun_symbol}{sun_time.strftime('%I:%M%p').lstrip('0')}"
-            padding_1 = 16 - len(conditions)
-            padding_2 = 16 - len(sun)
-            self.msg = Msg(
-                f'{current_time.ljust(padding_1)}{conditions}',
-                f'{wind.ljust(padding_2)}{sun}'
-            )
-        else:
-            self.msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
+                sun_time = datetime.fromtimestamp(sun_ts)
+                sun = f"{sun_symbol}{sun_time.strftime('%I:%M%p').lstrip('0')}"
+                padding_1 = 16 - len(conditions)
+                padding_2 = 16 - len(sun)
+                self.msg = Msg(
+                    f'{current_time.ljust(padding_1)}{conditions}',
+                    f'{wind.ljust(padding_2)}{sun}'
+                )
+            else:
+                self.msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
+
+            if self.active:
+                self.lcd.msg(self.msg)
+
+    def update_time(self, dt: datetime):
+        current_time = dt.strftime('%I:%M%p').lstrip('0').ljust(7)
+        self.msg.line_one = f'{current_time}{self.msg.line_one[7:]}'
+        if self.active:
+            self.lcd.msg(self.msg)
 
     async def run(self):
         try:
@@ -74,11 +89,10 @@ class Weather(MenuFrame):
                 now = datetime.now()
                 if self.active:
                     if now.minute % 15:
-                        current_time = now.strftime('%I:%M%p').lstrip('0').ljust(7)
-                        self.msg.line_one = f'{current_time}{self.msg.line_one[7:]}'
+                        self.update_time(now)
                     else:
-                        self.update()
+                        await self.update_all()
 
-                    self.lcd.msg(self.msg)
+
         finally:
             logging.exception('Weather stopped')
