@@ -2,6 +2,7 @@ import asyncio
 import logging
 import os
 from datetime import datetime
+from pprint import pformat
 from time import time
 
 import httpx
@@ -71,6 +72,7 @@ class Weather(MenuFrame):
                     f'{wind.ljust(padding_2)}{sun}'
                 )
             else:
+                logging.exception(pformat(res.__dict__))
                 self.msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
 
             if self.active:
