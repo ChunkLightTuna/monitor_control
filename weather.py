@@ -34,9 +34,9 @@ class Weather(MenuFrame):
             datetime.now().strftime('%I:%M%p').lstrip('0').ljust(7),
             'Weather Loading', Align.LEFT, Align.RIGHT
         )
-        asyncio.create_task(self.update_all())
-
         super().__init__(menu, msg)
+        self.update_all()
+        asyncio.create_task(self.update_all())
 
     def activate(self):
         super().activate()
