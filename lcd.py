@@ -1,20 +1,21 @@
 import json
 import sys
+from collections import OrderedDict
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Callable, Sequence
 from typing import Optional
 
 from adafruit_character_lcd.character_lcd import Character_LCD_Mono
 from digitalio import DigitalInOut, Pin
 
-BACKSLASH = '\x00'
-LEFT_ARROW = '\x01'
-UP_ARROW = '\x02'
-RIGHT_ARROW = '\x03'
-DOWN_ARROW = '\x04'
-FAHRENHEIT = '\x05'
-MOON = '\x06'
-SUN = '\x07'
+from patterns import BACKSLASH, UP_ARROW, DOWN_ARROW, AM, PM, patterns
+from patterns import Pattern
+
+
+def time_str(dt: datetime) -> str:
+    return f"{dt.strftime('%I:%M').lstrip('0')}{AM if dt.strftime('%p') == 'AM' else PM}"
 
 
 class Align(Enum):
@@ -42,6 +43,11 @@ class Msg:
             else:
                 line_two = ''
 
+        if len(line_one) > 16:
+            line_one = line_one[:16]
+        if len(line_two) > 16:
+            line_two = line_two[:16]
+
         match align_one:
             case Align.LEFT:
                 line_one = line_one.lstrip()
@@ -62,12 +68,32 @@ class Msg:
         self.line_two = line_two
 
     def add_arrows(self):
-        self.line_one = f"{self.line_one:<16}"[:14] + '2' + UP_ARROW
-        self.line_two = f"{self.line_two:<16}"[:14] + '8' + DOWN_ARROW
+        self.line_one = f'{f"{self.line_one:<16}"[:14]}2{UP_ARROW}'
+        self.line_two = f'{f"{self.line_two:<16}"[:14]}8{DOWN_ARROW}'
         return self
 
     def __repr__(self):
         return f'{self.line_one}\n{self.line_two}'
+
+
+class PatternCache:
+    def __init__(self, create_char: Callable[[int, Sequence[int]], None]):
+        self._create_char = create_char
+        self._cache = OrderedDict({c: c for c in [int.to_bytes(i).decode() for i in range(8)]})
+        assert all(c in [p.char for p in patterns] for c in self._cache)
+        for p in patterns:
+            if p.char in self._cache:
+                self._create_char(int.from_bytes(p.char.encode()), p.seq)
+
+    def __getitem__(self, p: Pattern) -> str:
+        if p.char in self._cache:
+            self._cache.move_to_end(p.char)
+            char = self._cache[p.char]
+        else:
+            char = self._cache.popitem(last=False)[1]
+            self._cache[p.char] = char
+            self._create_char(int.from_bytes(p.char.encode()), p.seq)
+        return char
 
 
 class LCD(Character_LCD_Mono):
@@ -90,19 +116,27 @@ class LCD(Character_LCD_Mono):
             lines=2
         )
 
-        self.create_char(0, [0, 0, 16, 8, 4, 2, 1, 0])  # backslash
-        self.create_char(1, [0, 2, 6, 14, 6, 2, 0, 0])  # arrow left
-        self.create_char(2, [0, 0, 4, 14, 31, 0, 0, 0])  # arrow up
-        self.create_char(3, [0, 8, 12, 14, 12, 8, 0, 0])  # arrow right
-        self.create_char(4, [0, 0, 31, 14, 4, 0, 0, 0])  # arrow down
-        self.create_char(5, [24, 24, 7, 4, 7, 4, 4, 0])  # fahrenheit
-        self.create_char(6, [0, 14, 31, 31, 31, 14, 0, 0])  # moon
-        self.create_char(7, [0, 14, 17, 17, 17, 14, 0, 0])  # sun
+        self.pattern_cache = PatternCache(self.create_char)
+
         self.clear()
 
     def msg(self, m: Msg):
         self.clear()
-        self.message = f'{m.line_one}\n{m.line_two}'.replace('\\', BACKSLASH)
+
+        s = (
+            f'{m.line_one}\n{m.line_two}'
+            .replace('\\', str(BACKSLASH))
+            .replace('\t', ' ')
+        )
+        count = 0
+        for p in patterns:
+            if p.char in s:
+                count += 1
+                if count > 8:
+                    raise Exception('Max 8 symbols per msg')
+                s.replace(p.char, self.pattern_cache[p])
+
+        self.message = s
 
 
 if __name__ == "__main__":

@@ -8,7 +8,8 @@ from time import time
 import httpx
 
 from frame import MenuFrame, Menu
-from lcd import FAHRENHEIT, MOON, SUN, Align, Msg
+from lcd import Align, Msg, time_str
+from patterns import FAHRENHEIT, MOON, SUN
 
 directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
 
@@ -31,7 +32,7 @@ class Weather(MenuFrame):
         self.forecast_url = f"{open_weather_url}/forecast?{url_params}"
 
         msg = Msg(
-            datetime.now().strftime('%I:%M%p').lstrip('0').ljust(7),
+            time_str(datetime.now()).ljust(7),
             'Weather Loading', Align.LEFT, Align.RIGHT
         )
         asyncio.create_task(self.update_all())
@@ -52,9 +53,9 @@ class Weather(MenuFrame):
             if res.is_success:
                 w = res.json()
                 now = datetime.now()
-                current_time = now.strftime('%I:%M%p').lstrip('0').rstrip('M')
+                current_time = time_str(now)
                 conditions = f"{round(w['main']['temp'])}{FAHRENHEIT}{w['weather'][0]['main']}"[:10]
-                wind = f"{round(w['wind']['speed'])}mph{wind_dir(w['wind']['deg'])}"
+                wind = f"{round(w['wind']['speed'])}mph{wind_dir(w['wind']['deg']) if int(w['wind']['speed']) else ''}"
 
                 sun_ts, sun_symbol = (
                     w['sys']['sunset'], MOON
@@ -63,7 +64,7 @@ class Weather(MenuFrame):
                 )
 
                 sun_time = datetime.fromtimestamp(sun_ts)
-                sun = f"{sun_symbol}{sun_time.strftime('%I:%M%p').lstrip('0')}"
+                sun = f"{sun_symbol}{time_str(sun_time)}"
                 padding_1 = 16 - len(conditions)
                 padding_2 = 16 - len(sun)
                 self.msg = Msg(
@@ -78,7 +79,7 @@ class Weather(MenuFrame):
                 self.lcd.msg(self.msg)
 
     def update_time(self, dt: datetime):
-        current_time = dt.strftime('%I:%M%p').lstrip('0').ljust(7)
+        current_time = time_str(dt).ljust(7)
         self.msg.line_one = f'{current_time}{self.msg.line_one[7:]}'
         if self.active:
             self.lcd.msg(self.msg)
