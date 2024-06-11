@@ -79,21 +79,21 @@ class Msg:
 class PatternCache:
     def __init__(self, create_char: Callable[[int, Sequence[int]], None]):
         self._create_char = create_char
-        self._cache = OrderedDict({c: c for c in [int.to_bytes(i).decode() for i in range(8)]})
-        assert all(c in [p.char for p in patterns] for c in self._cache)
+        self._cache = OrderedDict[int, int]({i: i for i in range(8)})
+        assert all(i in [p.i for p in patterns] for i in self._cache)
         for p in patterns:
-            if p.char in self._cache:
-                self._create_char(int.from_bytes(p.char.encode()), p.seq)
+            if p.i in self._cache:
+                self._create_char(p.i, p.seq)
 
     def __getitem__(self, p: Pattern) -> str:
-        if p.char in self._cache:
-            self._cache.move_to_end(p.char)
-            char = self._cache[p.char]
+        if p.i in self._cache:
+            self._cache.move_to_end(p.i)
+            i = self._cache[p.i]
         else:
-            char = self._cache.popitem(last=False)[1]
-            self._cache[p.char] = char
-            self._create_char(int.from_bytes(p.char.encode()), p.seq)
-        return char
+            i = self._cache.popitem(last=False)[1]
+            self._cache[p.i] = i
+            self._create_char(i, p.seq)
+        return int.to_bytes(i).decode()
 
 
 class LCD(Character_LCD_Mono):
@@ -117,7 +117,6 @@ class LCD(Character_LCD_Mono):
         )
 
         self.pattern_cache = PatternCache(self.create_char)
-
         self.clear()
 
     def msg(self, m: Msg):
