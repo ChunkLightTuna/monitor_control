@@ -16,16 +16,13 @@ class MainMenu(Menu):
         self.lcd = LCD()
 
         self.cur = 0
-        main_menu = MainMenuFrame(self)
-        main_menu.activate()
-        self.stack: List[Frame] = [main_menu]
-        self.weather = Weather(self)
-        self.submenus: List[MenuFrame] = [main_menu, self.weather]
+        self.submenus: List[MenuFrame] = [Weather(self), MainMenuFrame(self)]
+        self.stack: List[Frame] = [self.submenus[0]]
+        self.stack[0].activate()
         self.apply()
 
     async def run(self):
-        # await asyncio.gather(self.weather.run())
-        await self.weather.run()
+        await asyncio.gather(*[f() for f in [*self.stack, *self.submenus] if callable(f)])
 
     def prev_menu(self):
         self.submenus[self.cur].deactivate()

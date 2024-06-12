@@ -35,10 +35,10 @@
     </style>
 </head>
 <body>
-<form id="form" autocomplete="off">
-    <input type="text" class="text" id="line_one" maxlength="16" placeholder="Two Lines">
-    <input type="text" class="text" id="line_two" maxlength="16" placeholder="16 Chars Each">
-    <input type="submit" class="submit" id="submit" value="Send">
+<form autocomplete="off" id="form">
+    <input class="text" id="line_one" maxlength="16" placeholder="Two Lines" type="text">
+    <input class="text" id="line_two" maxlength="16" placeholder="16 Chars Each" type="text">
+    <input class="submit" id="submit" type="submit" value="Send">
 </form>
 <script>
     const line_one = document.getElementById('line_one')

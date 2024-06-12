@@ -54,8 +54,8 @@ class Weather(MenuFrame):
                 w = res.json()
                 now = datetime.now()
                 current_time = time_str(now)
-                conditions = f"{round(w['main']['temp'])}{FAHRENHEIT}{w['weather'][0]['main']}"[:10]
-                wind = f"{round(w['wind']['speed'])}mph{wind_dir(w['wind']['deg']) if int(w['wind']['speed']) else ''}"
+                conditions = f"{round(w['main']['temp'])}{FAHRENHEIT} {w['weather'][0]['main']}"[:10]
+                wind = f"{round(w['wind']['speed'])}mph{' ' + wind_dir(w['wind']['deg']) if int(w['wind']['speed']) else ''}"
 
                 sun_ts, sun_symbol = (
                     w['sys']['sunset'], MOON
@@ -84,7 +84,7 @@ class Weather(MenuFrame):
         if self.active:
             self.lcd.msg(self.msg)
 
-    async def run(self):
+    async def __call__(self):
         try:
             while True:
                 await asyncio.sleep(60 - time() % 60)
