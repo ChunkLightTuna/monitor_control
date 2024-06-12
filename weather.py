@@ -78,7 +78,7 @@ class Weather(MenuFrame):
     def update_msg(self, dt: datetime):
         ts = time_str(dt)
         s1 = max(0, 16 - (len(ts) + len(self.temperature) + len(self.conditions)))
-        line_one = f"{ts}{' ' * int(s1 / 2) + s1 % 2}{self.temperature}{' ' * int(s1 / 2)}{self.conditions}"
+        line_one = f"{ts}{' ' * (int(s1 / 2) + s1 % 2)}{self.temperature}{' ' * int(s1 / 2)}{self.conditions}"
 
         s2 = 16 - (len(self.wind_speed) + len(self.wind_dir) + len(self.sun))
 
