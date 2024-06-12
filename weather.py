@@ -31,56 +31,62 @@ class Weather(MenuFrame):
         self.current_url = f"{open_weather_url}/weather?{url_params}"
         self.forecast_url = f"{open_weather_url}/forecast?{url_params}"
 
+        self.temperature = ''
+        self.conditions = ''
+        self.sun = ''
+        self.wind_speed = ''
+        self.wind_dir = ''
+
         msg = Msg(
-            time_str(datetime.now()).ljust(7),
+            time_str(datetime.now()),
             'Weather Loading', Align.LEFT, Align.RIGHT
         )
-        asyncio.create_task(self.update_all())
+        asyncio.create_task(self.update_weather())
         super().__init__(menu, msg)
 
     def activate(self):
         super().activate()
-        asyncio.create_task(self.update_all())
+        asyncio.create_task(self.update_weather())
 
     def todays_forecast(self):
         fore = httpx.get(self.forecast_url).json()
         today = datetime.now().day
         return [f for f in fore['list'] if datetime.fromtimestamp(int(f['dt'])).day == today]
 
-    async def update_all(self):
+    async def update_weather(self):
         async with httpx.AsyncClient() as client:
             res = await client.get(self.current_url)
+            now = datetime.now()
             if res.is_success:
                 w = res.json()
-                now = datetime.now()
-                current_time = time_str(now)
-                conditions = f"{round(w['main']['temp'])}{FAHRENHEIT} {w['weather'][0]['main']}"[:10]
-                wind = f"{round(w['wind']['speed'])}mph{' ' + wind_dir(w['wind']['deg']) if int(w['wind']['speed']) else ''}"
+                self.temperature = f"{round(w['main']['temp'])}{FAHRENHEIT}"
+                self.conditions = w['weather'][0]['main']
+                self.wind_speed = f"{round(w['wind']['speed'])}mph"
+                self.wind_dir = wind_dir(w['wind']['deg']) if int(w['wind']['speed']) else ''
 
                 sun_ts, sun_symbol = (
                     w['sys']['sunset'], MOON
                 ) if (w['sys']['sunrise'] < now.timestamp() < w['sys']['sunset']) else (
                     w['sys']['sunrise'], SUN
                 )
-
-                sun_time = datetime.fromtimestamp(sun_ts)
-                sun = f"{sun_symbol}{time_str(sun_time)}"
-                padding_1 = 16 - len(conditions)
-                padding_2 = 16 - len(sun)
-                self.msg = Msg(
-                    f'{current_time.ljust(padding_1)}{conditions}',
-                    f'{wind.ljust(padding_2)}{sun}'
-                )
+                self.sun = f"{sun_symbol}{time_str(datetime.fromtimestamp(sun_ts))}"
             else:
                 logging.exception(pformat(res.__dict__))
-                self.msg = Msg('Failed to Pull', 'Weather Data', Align.CENTER, Align.CENTER)
 
-            if self.active:
-                self.lcd.msg(self.msg)
+            self.update_msg(now)
 
-    def update_time(self, dt: datetime):
-        current_time = time_str(dt).ljust(7)
-        self.msg.line_one = f'{current_time}{self.msg.line_one[7:]}'
+    def update_msg(self, dt: datetime):
+        ts = time_str(dt)
+        s1 = max(0, 16 - (len(ts) + len(self.temperature) + len(self.conditions)))
+        line_one = f"{ts}{' ' * int(s1 / 2) + s1 % 2}{self.temperature}{' ' * int(s1 / 2)}{self.conditions}"
+
+        s2 = 16 - (len(self.wind_speed) + len(self.wind_dir) + len(self.sun))
+
+        s21 = int(s2 > 1)
+        s22 = s2 - s21
+        line_two = f"{self.wind_speed}{' ' * s21}{self.wind_dir}{' ' * s22}{self.sun}"
+
+        self.msg = Msg(line_one, line_two)
         if self.active:
             self.lcd.msg(self.msg)
 
@@ -91,9 +97,9 @@ class Weather(MenuFrame):
                 now = datetime.now()
                 if self.active:
                     if now.minute % 15:
-                        self.update_time(now)
+                        self.update_msg(now)
                     else:
-                        await self.update_all()
+                        await self.update_weather()
 
 
         finally:
