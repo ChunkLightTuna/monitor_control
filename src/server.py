@@ -11,10 +11,10 @@ from main_menu import MainMenu
 router = APIRouter()
 
 logging.warning(os.getcwd())
-with open('src/res/index.html', 'r') as f:
+with open('res/index.html', 'r') as f:
     index = HTMLResponse(content=f.read())
 
-favicon = FileResponse(path='src/res/favicon.ico', media_type="text/x-favicon")
+favicon = FileResponse(path='res/favicon.ico', media_type="text/x-favicon")
 
 
 @router.get("/favicon.ico")
