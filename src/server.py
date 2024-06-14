@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 
 from fastapi import HTTPException, Request, FastAPI, status, APIRouter
 from fastapi.responses import FileResponse, HTMLResponse, Response
@@ -10,7 +9,6 @@ from main_menu import MainMenu
 
 router = APIRouter()
 
-logging.warning(os.getcwd())
 with open('res/index.html', 'r') as f:
     index = HTMLResponse(content=f.read())
 
