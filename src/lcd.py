@@ -99,7 +99,7 @@ class PatternCache:
 class LCD(Character_LCD_Mono):
 
     def __init__(self):
-        with open('pinout.json') as f:
+        with open('../pinout.json') as f:
             pins = json.load(f)['display_bcm_pins']
 
         # vss = GND (https://pinout.xyz/pinout/ground)

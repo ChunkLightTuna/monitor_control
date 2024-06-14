@@ -30,7 +30,7 @@ class Keypad:
     buttons: dict[str, SyntheticButton]
 
     def __init__(self):
-        with open('pinout.json') as f:
+        with open('../pinout.json') as f:
             pins = json.load(f)['keypad_bcm_pins']
 
         self.matrix = KeyMatrix(
@@ -41,14 +41,11 @@ class Keypad:
         self.buttons = {button.label: button for button in self._buttons}
 
     async def run(self):
-        try:
-            while True:
-                event = self.matrix.events.get()
-                if event and event.pressed:
-                    self._buttons[event.key_number].press()
-                await asyncio.sleep(.001)
-        finally:
-            logging.exception('Keypad stopped')
+        while True:
+            event = self.matrix.events.get()
+            if event and event.pressed:
+                self._buttons[event.key_number].press()
+            await asyncio.sleep(.001)
 
 
 if __name__ == "__main__":

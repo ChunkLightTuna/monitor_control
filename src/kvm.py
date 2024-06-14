@@ -12,7 +12,7 @@ class Display:
 
 class KVM:
     def __init__(self):
-        with open('pinout.json') as f:
+        with open('../pinout.json') as f:
             pinout = json.load(f)
 
         # When you get around to using a KVM again

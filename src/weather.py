@@ -26,10 +26,12 @@ class Weather(MenuFrame):
         weather_key = os.environ.get('OPEN_WEATHER_API_KEY')
         lat = os.environ.get('LAT')
         lon = os.environ.get('LON')
-        open_weather_url = "https://api.openweathermap.org/data/2.5"
+        self.invalid = any(i is None for i in [weather_key, lat, lon])
+        open_weather_url = "https://api.openweathermap.org/data"
         url_params = f"lat={lat}&lon={lon}&appid={weather_key}&units=imperial"
-        self.current_url = f"{open_weather_url}/weather?{url_params}"
-        self.forecast_url = f"{open_weather_url}/forecast?{url_params}"
+        self.current_url = f"{open_weather_url}/2.5/weather?{url_params}"
+        self.forecast_url = f"{open_weather_url}/2.5/forecast?{url_params}"
+        self.detailed_forecast_url = f"{open_weather_url}/3.0/onecall?{url_params}"
 
         self.temperature = ''
         self.conditions = ''
@@ -39,7 +41,7 @@ class Weather(MenuFrame):
 
         msg = Msg(
             time_str(datetime.now()),
-            'Weather Loading', Align.LEFT, Align.RIGHT
+            'Bad Weather Conf' if self.invalid else 'Weather Loading', Align.LEFT, Align.RIGHT
         )
         asyncio.create_task(self.update_weather())
         super().__init__(menu, msg)
@@ -54,6 +56,8 @@ class Weather(MenuFrame):
         return [f for f in fore['list'] if datetime.fromtimestamp(int(f['dt'])).day == today]
 
     async def update_weather(self):
+        if self.invalid:
+            return
         async with httpx.AsyncClient() as client:
             res = await client.get(self.current_url)
             now = datetime.now()
@@ -75,6 +79,10 @@ class Weather(MenuFrame):
 
             self.update_msg(now)
 
+    async def get_forecast(self):
+        async with httpx.AsyncClient() as client:
+            res = await client.get(self.forecast_url)
+
     def update_msg(self, dt: datetime):
         ts = time_str(dt)
         s1 = max(0, 16 - (len(ts) + len(self.temperature) + len(self.conditions)))
@@ -91,16 +99,11 @@ class Weather(MenuFrame):
             self.lcd.msg(self.msg)
 
     async def __call__(self):
-        try:
-            while True:
-                await asyncio.sleep(60 - time() % 60)
-                now = datetime.now()
-                if self.active:
-                    if now.minute % 15:
-                        self.update_msg(now)
-                    else:
-                        await self.update_weather()
-
-
-        finally:
-            logging.exception('Weather stopped')
+        while True:
+            await asyncio.sleep(60 - time() % 60)
+            now = datetime.now()
+            if self.active:
+                if now.minute % 15:
+                    self.update_msg(now)
+                else:
+                    await self.update_weather()

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>16x2</title>
+    <style>
+        body {
+            height: 100vh;
+            align-content: center;
+            margin: 0;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: 4ch;
+        }
+
+        input {
+            width: 16ch;
+            font-size: 7vw;
+        }
+
+        input.text {
+            padding-left: 1ch;
+        }
+
+        input.submit {
+            width: 17.2ch;
+            margin: 1ch;
+
+        }
+    </style>
+</head>
+<body>
+<form autocomplete="off" id="form">
+    <input class="text" id="line_one" maxlength="16" placeholder="Two Lines" type="text">
+    <input class="text" id="line_two" maxlength="16" placeholder="16 Chars Each" type="text">
+    <input class="submit" id="submit" type="submit" value="Send">
+</form>
+<script>
+    const line_one = document.getElementById('line_one')
+    const line_two = document.getElementById('line_two')
+    const submit = document.getElementById('submit')
+
+    document.getElementById('form').onsubmit = () => {
+        fetch("/", {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify([line_one.value, line_two.value])
+        }).then(response => {
+            submit.value = response.ok ? '✅' : '❌'
+            setTimeout(() => submit.value = 'Send', 500)
+        });
+        return false;
+    }
+</script>
+</body>
+</html>
