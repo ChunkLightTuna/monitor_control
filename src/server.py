@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from fastapi import HTTPException, Request, FastAPI, status, APIRouter
 from fastapi.responses import FileResponse, HTMLResponse, Response
@@ -9,10 +10,11 @@ from main_menu import MainMenu
 
 router = APIRouter()
 
-with open('res/index.html', 'r') as f:
+logging.warning(os.getcwd())
+with open('src/res/index.html', 'r') as f:
     index = HTMLResponse(content=f.read())
 
-favicon = FileResponse(path='res/favicon.ico', media_type="text/x-favicon")
+favicon = FileResponse(path='src/res/favicon.ico', media_type="text/x-favicon")
 
 
 @router.get("/favicon.ico")
