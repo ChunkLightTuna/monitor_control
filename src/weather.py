@@ -102,8 +102,7 @@ class Weather(MenuFrame):
         while True:
             await asyncio.sleep(60 - time() % 60)
             now = datetime.now()
-            if self.active:
-                if now.minute % 15:
-                    self.update_msg(now)
-                else:
-                    await self.update_weather()
+            if now.minute % 15:
+                self.update_msg(now)
+            else:
+                await self.update_weather()
