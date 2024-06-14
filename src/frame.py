@@ -72,5 +72,5 @@ class MainMenuFrame(MenuFrame):
         super().__init__(menu, Msg('Main Menu').add_arrows())
         self.button_funs['A'] = lambda: menu.numerical_input('SET VOLUME', menu.kvm.volume)
         self.button_funs['B'] = lambda: menu.numerical_input("SET BRIGHTNESS", menu.kvm.brightness)
-        self.button_funs['C'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.prev(menu.lcd)))
-        self.button_funs['D'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.next(menu.lcd)))
+        self.button_funs['C'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.prev()))
+        self.button_funs['D'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.next()))
