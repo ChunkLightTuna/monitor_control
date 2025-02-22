@@ -1,4 +1,4 @@
-adafruit-blinka==8.41.2
-adafruit-circuitpython-charlcd==3.4.10
-fastapi==0.111.0
-uvicorn==0.30.1
+adafruit-blinka==8.54.0
+adafruit-circuitpython-charlcd==3.5.1
+fastapi==0.115.8
+uvicorn==0.34.0
