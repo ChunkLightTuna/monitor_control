@@ -1,6 +1,9 @@
+import gc
 import json
 import logging
+import tracemalloc
 
+import objgraph
 from fastapi import HTTPException, Request, FastAPI, status, APIRouter
 from fastapi.responses import FileResponse, HTMLResponse, Response
 
@@ -51,6 +54,32 @@ async def post(request: Request):
             logging.error(repr(e))
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@router.get("/debug/memory")
+async def memory_debug():
+    # Get current memory snapshot
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+
+    # Get object counts
+    types = objgraph.most_common_types(limit=20)
+
+    # Force garbage collection and get counts
+    gc.collect()
+
+    return {
+        "top_memory_allocations": [
+            {
+                "file": stat.traceback[0].filename,
+                "line": stat.traceback[0].lineno,
+                "size": stat.size,
+                "count": stat.count
+            }
+            for stat in top_stats[:10]
+        ],
+        "object_counts": dict(types),
+        "total_tracked_memory": tracemalloc.get_traced_memory()
+    }
 
 if __name__ == '__main__':
     import sys

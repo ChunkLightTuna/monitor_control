@@ -4,3 +4,5 @@ fastapi==0.115.8
 uvicorn==0.34.0
 psutil==7.0.0
 requests==2.32.3
+objgraph==3.6.2
+memory_profiler==0.61.0

@@ -9,77 +9,62 @@ def generate_bar(percent, size=20):
     return f"[{'■' * filled}{'-' * (size - filled)}]"
 
 
-def get_process_by_name(name="uvicorn"):
-    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-        try:
-            if name in proc.info['name'] or \
-                    any(name in cmd for cmd in proc.info['cmdline'] if cmd):
-                return psutil.Process(proc.pid)
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            continue
-    return None
-
-
 def format_bytes(bytes):
-    """Convert bytes to MB with 1 decimal place"""
-    return f"{bytes / (1024 * 1024):.1f}"
+    """Convert bytes to human readable format"""
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if bytes < 1024:
+            return f"{bytes:.1f}{unit}"
+        bytes /= 1024
+    return f"{bytes:.1f}TB"
 
 
 def monitor_process():
     WEBHOOK_URL = "https://discord.com/api/webhooks/1342891815283593318/3bh1fn_AOhPFeC1O-tWE4-1scsWh1K7nMtM8QSRXqlpk-RLObsHfRSqTi-UawqIclm8O"
 
-    # Find the uvicorn process
-    process = get_process_by_name("uvicorn")
-    if not process:
-        print("Process not found")
-        return
-
-    # Get process metrics
-    with process.oneshot():  # More efficient collection of metrics
-        # Basic process info
-        cpu_percent = process.cpu_percent()
-        mem_info = process.memory_full_info()
-
-        # Memory details (in MB)
-        rss = format_bytes(mem_info.rss)  # Physical memory
-        vms = format_bytes(mem_info.vms)  # Virtual memory
-        uss = format_bytes(mem_info.uss)  # Unique set size
-
-        # Thread information
-        threads = process.num_threads()
-        thread_details = process.threads()
-
-        # File descriptors
-        try:
-            fds = process.num_fds()
-        except AttributeError:  # Windows systems
-            fds = "N/A"
-
-        # Connections
-        connections = len(process.connections())
-
-        # System memory info
-        sys_mem = psutil.virtual_memory()
-        sys_cpu = psutil.cpu_percent()
-
-    # Create message
+    # System stats
+    sys_mem = psutil.virtual_memory()
+    sys_cpu = psutil.cpu_percent()
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    message = f"""**System & Process Status** | {timestamp}
+
+    try:
+        # Call the debug endpoint
+        debug_response = requests.get('http://localhost:1602/debug/memory', timeout=5)
+        debug_data = debug_response.json()
+
+        # Format the message
+        message = f"""**Memory Profile** | {timestamp}
 ```
-System:
+System Resources:
 CPU  : [{sys_cpu}%] {generate_bar(sys_cpu)}
 RAM  : [{sys_mem.percent}%] {generate_bar(sys_mem.percent)} ({sys_mem.used >> 20}/{sys_mem.total >> 20}MB)
 
-Python Process (PID: {process.pid}):
-CPU Usage : [{cpu_percent}%] {generate_bar(cpu_percent)}
-Memory:
-  - RSS    : {rss}MB (Physical memory)
-  - USS    : {uss}MB (Unique memory)
-  - VMS    : {vms}MB (Virtual memory)
-Activity:
-  - Threads: {threads}
-  - File descriptors: {fds}
-  - Network connections: {connections}
+Top Memory Allocations:"""
+
+        # Add top memory allocations
+        for alloc in debug_data['top_memory_allocations']:
+            size = format_bytes(alloc['size'])
+            message += f"\n• {alloc['file']}:{alloc['line']} - {size} ({alloc['count']} objects)"
+
+        message += "\n\nObject Counts:"
+        # Add top 5 object counts
+        sorted_objects = sorted(debug_data['object_counts'].items(), key=lambda x: x[1], reverse=True)[:5]
+        for obj_type, count in sorted_objects:
+            message += f"\n• {obj_type}: {count:,}"
+
+        # Add total tracked memory
+        total_tracked = format_bytes(debug_data['total_tracked_memory'][0])
+        peak_tracked = format_bytes(debug_data['total_tracked_memory'][1])
+        message += f"\n\nTotal Tracked Memory: {total_tracked}"
+        message += f"\nPeak Tracked Memory: {peak_tracked}```"
+
+    except requests.exceptions.RequestException as e:
+        message = f"""**System Status** | {timestamp}
+```
+ERROR: Could not connect to debug endpoint: {str(e)}
+
+System Resources:
+CPU  : [{sys_cpu}%] {generate_bar(sys_cpu)}
+RAM  : [{sys_mem.percent}%] {generate_bar(sys_mem.percent)} ({sys_mem.used >> 20}/{sys_mem.total >> 20}MB)
 ```"""
 
     # Send to Discord
