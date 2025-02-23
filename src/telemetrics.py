@@ -28,7 +28,7 @@ def monitor_process():
 
     try:
         # Call the debug endpoint
-        debug_response = requests.get('http://localhost:1602/debug/memory', timeout=5)
+        debug_response = requests.get('http://localhost:1602/debug/memory', timeout=30)
         debug_data = debug_response.json()
 
         # Format the message
