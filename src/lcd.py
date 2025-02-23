@@ -106,14 +106,14 @@ class LCD(Character_LCD_Mono):
         # vdd = 5V (https://pinout.xyz/pinout/5v_power)
         # v0 = middle of trimpot
         super().__init__(
-            rs=DigitalInOut(Pin(pins['RS'])),
-            en=DigitalInOut(Pin(pins['EN'])),
-            db4=DigitalInOut(Pin(pins['D4'])),
-            db5=DigitalInOut(Pin(pins['D5'])),
-            db6=DigitalInOut(Pin(pins['D6'])),
-            db7=DigitalInOut(Pin(pins['D7'])),
-            columns=16,
-            lines=2
+            DigitalInOut(Pin(pins['RS'])),
+            DigitalInOut(Pin(pins['EN'])),
+            DigitalInOut(Pin(pins['D4'])),
+            DigitalInOut(Pin(pins['D5'])),
+            DigitalInOut(Pin(pins['D6'])),
+            DigitalInOut(Pin(pins['D7'])),
+            16,
+            2
         )
 
         self.pattern_cache = PatternCache(self.create_char)
