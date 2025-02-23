@@ -10,6 +10,9 @@ from fastapi.responses import FileResponse, HTMLResponse, Response
 from lcd import Msg
 from main_menu import MainMenu
 
+# Start tracemalloc at app startup
+tracemalloc.start()
+
 router = APIRouter()
 
 with open('res/index.html', 'r') as f:
