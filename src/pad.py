@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from digitalio import Pin
-from keypad import KeyMatrix
+from keypad import KeyMatrix, Event
 
 BUTTON_LABELS = [
     '1', '2', '3', 'A',
@@ -41,11 +41,11 @@ class Keypad:
         self.buttons = {button.label: button for button in self._buttons}
 
     async def run(self):
+        event = Event()
         while True:
-            event = self.matrix.events.get()
-            if event and event.pressed:
+            if self.matrix.events.get_into(event) and event.pressed:
                 self._buttons[event.key_number].press()
-            await asyncio.sleep(.001)
+            await asyncio.sleep(.005)
 
 
 if __name__ == "__main__":
