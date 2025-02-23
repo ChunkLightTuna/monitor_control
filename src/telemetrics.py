@@ -1,7 +1,7 @@
 from datetime import datetime
 
+import httpx
 import psutil
-import requests
 
 
 def generate_bar(percent, size=20):
@@ -28,8 +28,7 @@ def monitor_process():
 
     try:
         # Call the debug endpoint
-        debug_response = requests.get('http://localhost:1602/debug/memory', timeout=30)
-        debug_data = debug_response.json()
+        debug_data = httpx.get('http://localhost:1602/debug/memory', timeout=60).json()
 
         # Format the message
         message = f"""**Memory Profile** | {timestamp}
@@ -57,7 +56,7 @@ Top Memory Allocations:"""
         message += f"\n\nTotal Tracked Memory: {total_tracked}"
         message += f"\nPeak Tracked Memory: {peak_tracked}```"
 
-    except requests.exceptions.RequestException as e:
+    except httpx.RequestError as e:
         message = f"""**System Status** | {timestamp}
 ```
 ERROR: Could not connect to debug endpoint: {str(e)}
@@ -69,12 +68,12 @@ RAM  : [{sys_mem.percent}%] {generate_bar(sys_mem.percent)} ({sys_mem.used >> 20
 
     # Send to Discord
     try:
-        requests.post(
+        httpx.post(
             WEBHOOK_URL,
             json={"content": message},
             timeout=5
         )
-    except requests.exceptions.RequestException as e:
+    except httpx.RequestError as e:
         print(f"Failed to send to Discord: {e}")
 
 
