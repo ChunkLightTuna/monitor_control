@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Callable, List
 
-from frame import Frame, MainMenuFrame, Menu, MenuFrame
+from frame import Frame, Menu, MenuFrame
 from kvm import KVM
 from lcd import LCD, Msg
 from pad import Keypad, SyntheticButton
@@ -16,7 +16,10 @@ class MainMenu(Menu):
         self.lcd = LCD()
 
         self.cur = 0
-        self.submenus: List[MenuFrame] = [Weather(self), MainMenuFrame(self)]
+        self.submenus: List[MenuFrame] = [
+            Weather(self),
+            MenuFrame(self, Msg('Main Menu').add_arrows())
+        ]
         self.stack: List[Frame] = [self.submenus[0]]
         self.stack[0].activate()
         self.apply()

@@ -66,10 +66,6 @@ class MenuFrame(Frame):
                 case _:  # for closure label is on left
                     self.button_funs[b] = lambda m=f"{b} unmapped": menu.msg_ephemeral(m, .5)
 
-
-class MainMenuFrame(MenuFrame):
-    def __init__(self, menu: Menu):
-        super().__init__(menu, Msg('Main Menu').add_arrows())
         self.button_funs['A'] = lambda: menu.numerical_input('SET VOLUME', menu.kvm.volume)
         self.button_funs['B'] = lambda: menu.numerical_input("SET BRIGHTNESS", menu.kvm.brightness)
         self.button_funs['C'] = lambda: menu.msg_ephemeral(Msg('DISPLAY:', menu.kvm.prev()))
