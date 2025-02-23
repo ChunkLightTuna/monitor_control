@@ -45,7 +45,7 @@ class Keypad:
         while True:
             if self.matrix.events.get_into(event) and event.pressed:
                 self._buttons[event.key_number].press()
-            await asyncio.sleep(.005)
+            await asyncio.sleep(.05)
 
 
 if __name__ == "__main__":
